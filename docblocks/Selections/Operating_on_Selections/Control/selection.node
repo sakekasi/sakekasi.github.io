@@ -1,0 +1,5 @@
+selection.node
+
+
+
+Returns the first non-null element in the current selection. If the selection is empty, returns null.

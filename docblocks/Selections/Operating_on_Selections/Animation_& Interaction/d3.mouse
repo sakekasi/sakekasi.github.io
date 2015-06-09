@@ -1,0 +1,5 @@
+d3.mouse
+
+
+
+Returns the *x* and *y* coordinates of the current [d3.event](#d3_event), relative to the specified *container*. The container may be an HTML or SVG container element, such as an [[svg:g|http://www.w3.org/TR/SVG/struct.html#Groups]] or [[svg:svg|http://www.w3.org/TR/SVG/struct.html#SVGElement]]. The coordinates are returned as a two-element array [*x*, *y*].

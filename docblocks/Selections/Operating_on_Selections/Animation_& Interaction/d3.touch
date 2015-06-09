@@ -1,0 +1,5 @@
+d3.touch
+
+
+
+Returns the *x* and *y* coordinates of the touch with the specified identifier associated with the current [d3.event](#d3_event), relative to the specified *container*. If *touches* is not specified, defaults to the current event’s [[changedTouches|http://developer.apple.com/library/safari/documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html#//apple_ref/javascript/instp/TouchEvent/changedTouches]]. The container may be an HTML or SVG container element, such as an svg:g or svg:svg. The coordinates are returned as an array of two-element arrays [ [ *x1*, *y1*], [ *x2*, *y2*], … ]. If there is no touch with the specified identifier in *touches*, returns null; this can be useful for ignoring touchmove events where the only some touches have moved.

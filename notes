@@ -1,0 +1,25 @@
+tooltip on hover, highlight the relevant line
+different levels of block : file, documentation section,
+ filter notes by author, by date, etc.
+
+knowledge dump - draw uml/architecture stuff for arch.
+bug reports - talking about relationships between things. provide for drawings, expansions
+
+
+split string based on regex to recognize #
+add lines to guide vision
+
+markup by hand with hyperlinks
+
+do presentation in the environment
+
+copare to john resig's annotated jquery source code
+
+look into underscore
+
+parsing the code sections of markdown
+
+
+re = />#<\/a> [a-zA-Z0-9]+.<b>[a-zA-Z]+(\(\))?<\/b>\(/m;
+
+(?:\n(#+) ([\w&]+(?: [\w&]+)*))|(?:\n<a(?: name="\w+")? href="(?:Selections)?#(?:\w+)">#<\/a> (\w+.)<b>([a-zA-Z]+)<\/b>(?:\([a-zA-Z0-9, \[\]<>\/…]*\))?)

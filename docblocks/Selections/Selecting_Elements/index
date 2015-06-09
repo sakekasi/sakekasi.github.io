@@ -1,0 +1,5 @@
+## Selecting Elements
+
+
+
+D3 provides two top-level methods for selecting elements: [select](Selections#d3_select) and [selectAll](Selections#d3_selectAll). These methods accept selector strings; the former selects only the first matching element, while the latter selects *all* matching elements in document traversal order. These methods can also accept nodes, which is useful for integration with third-party libraries such as jQuery or developer tools (`$0`).

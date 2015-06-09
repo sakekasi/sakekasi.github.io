@@ -1,0 +1,37 @@
+{
+  "name": "2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babelify": "^6.1.1",
+    "browserify": "^10.2.1",
+    "console-browserify": "^1.1.0",
+    "gulp": "^3.8.11",
+    "gulp-markdown": "~1.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-util": "~3.0.4",
+    "orchestrator": "^0.3.7",
+    "partial": "0.0.3",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.2.1"
+  },
+  "dependencies": {
+    "esprima": "^2.2.0",
+    "estraverse": "~4.1.0",
+    "immutable": "^3.7.3",
+    "jquery": "^2.1.4",
+    "js-beautify": "^1.5.5",
+    "marked": "^0.3.3",
+    "object-hash": "^0.8.0",
+    "react": "^0.13.3",
+    "redeyed": "^0.5.0"
+  }
+}

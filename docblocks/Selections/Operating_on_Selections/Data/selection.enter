@@ -1,0 +1,37 @@
+#### [selection.enter]($updocblocks/Selections/Operating_on_Selections/Data/index)
+
+
+
+Returns the enter selection: placeholder nodes for each data element for which no corresponding existing DOM element was found in the current selection. This method is only defined on the update selection, which is returned by the [data](Selections#data) operator. In addition, the enter selection only defines the [append](Selections#append), [insert](Selections#insert), [select](Selections#select) and [call](Selections#call) operators; you must use these operators to instantiate the entering elements before modifying any content. Enter selections also support [empty](Selections#empty) and [size](Selections#size).
+
+As a simple example, consider the case where the existing selection is empty, and we wish to create new nodes to match our data:
+
+```javascript
+d3.select("body").selectAll("div")
+   .data([4, 8, 15, 16, 23, 42])
+ .enter().append("div")
+   .text(function(d) { return d; });
+```
+
+Assuming that the body is initially empty, the above code will create six new DIV elements, append them to the body in order, and assign their text content as the associated (string-coerced) number:
+
+```html
+<div>4</div>
+<div>8</div>
+<div>15</div>
+<div>16</div>
+<div>23</div>
+<div>42</div>
+```
+
+Another way to think about the entering placeholder nodes is that they are pointers to the parent node (in this example, the document body); however, they only support append and insert. Once elements have been inserted, their indices will reflect the new positions and not necessarily start from zero or be continuous.
+
+The enter selection **merges into the update selection** when you append or insert. Rather than applying the same operators to the enter and update selections separately, you can now apply them only once to the update selection after entering the nodes. If you find yourself removing an entire selection's elements only to reinsert most of them, do this instead. For example:
+
+```javascript
+var update_sel = svg.selectAll("circle").data(data)
+update_sel.attr(/* operate on old elements only */)
+update_sel.enter().append("circle").attr(/* operate on new elements only */)
+update_sel.attr(/* operate on old and new elements */)
+update_sel.exit().remove() /* complete the enter-update-exit pattern */
+```

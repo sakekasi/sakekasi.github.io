@@ -1,0 +1,11 @@
+d3.select = function(node) {
+  var group;
+  if (typeof node === "string") {
+    group = [d3_select(node, d3_document)];
+    group.parentNode = d3_document.documentElement;
+  } else {
+    group = [node];
+    group.parentNode = d3_documentElement(node);
+  }
+  return d3_selection([group]);
+};

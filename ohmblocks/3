@@ -1,0 +1,3 @@
+Load the grammar from the <script> tag above. Note that the tag's `type` attribute is set to "text/ohm-js" to differentiate it from other (non-Ohm) script tags.
+
+`var g = ohm.grammarFromScriptElement();`

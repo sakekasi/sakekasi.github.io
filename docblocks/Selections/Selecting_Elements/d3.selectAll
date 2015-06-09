@@ -1,0 +1,5 @@
+d3.selectAll
+
+
+
+Selects the specified array of elements. This is useful if you already have a reference to nodes, such as `d3.selectAll(this.childNodes)` within an event listener, or a global such as `document.links`. The *nodes* argument doesn't have to be an array, exactly; any pseudo-array that can be coerced into an array (e.g., a `NodeList` or `arguments`) will work. This function does not traverse the DOM.

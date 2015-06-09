@@ -1,0 +1,45 @@
+selection.call
+
+
+
+Invokes the specified *function* once, passing in the current selection along with any optional *arguments*. The call operator always returns the current selection, regardless of the return value of the specified function. The call operator is identical to invoking a function by hand; but it makes it easier to use method chaining. For example, say we want to set a number of attributes the same way in a number of different places. So we take the code and wrap it in a reusable function:
+
+```javascript
+function foo(selection) {
+ selection
+     .attr("name1", "value1")
+     .attr("name2", "value2");
+}
+```
+
+Now, we can say this:
+
+```javascript
+foo(d3.selectAll("div"));
+```
+
+Or equivalently:
+
+```javascript
+d3.selectAll("div").call(foo);
+```
+
+The `this` context of the called function is also the current selection. This is slightly redundant with the first argument, which we might fix in the future.
+
+If you use an object's method in selection.call and need `this` to point to that object you create a function *bound* to the object before calling.
+
+```
+function Foo(text) {
+   this.text = text;
+}
+
+Foo.prototype.setText = function(selection) {
+   selection.text(this.text);
+}
+
+var bar = new Foo("Bar");
+
+d3.selectAll("span").call(bar.setText.bind(bar));
+// Or
+d3.selectAll("span").call(Foo.prototype.setText.bind(bar));
+```

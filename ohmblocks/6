@@ -1,0 +1,5 @@
+In Ohm, a grammar determines the set of all valid inputs / sentences in a language, but it doesn't specify what to do with valid inputs. To do something other than recognize valid inputs (e.g., to generate a parse tree or interpret a program) you first have to create a *semantics* for that grammar.
+
+A semantics is a family of *operations* and *attributes* for a given grammar. A grammar may have any number of semantics associated with it -- this means that the clients of a grammar (even in the same program) never have to worry about operation/attribute name clashes. Below, we create a new semantics `s` for our arithmetic grammar.
+
+`var s = g.semantics();`

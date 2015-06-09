@@ -1,0 +1,26 @@
+[
+  {
+    "block": 1,
+    "text": "node is a Node"
+  },
+  {
+    "block": 1,
+    "text": "node is a Window"
+  },
+  {
+    "block": 1,
+    "text": "node is a Document"
+  },
+  {
+    "block": 2,
+    "text": "node is a Node"
+  },
+  {
+    "block": 2,
+    "text": "node is a Window"
+  },
+  {
+    "block": 2,
+    "text": "node is a Document"
+  }
+]

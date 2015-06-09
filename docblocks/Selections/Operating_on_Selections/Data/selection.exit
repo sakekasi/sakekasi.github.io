@@ -1,0 +1,55 @@
+#### [selection.exit]($updocblocks/Selections/Operating_on_Selections/Data/index)
+
+
+
+Returns the exit selection: existing DOM elements in the current selection for which no new data element was found. This method is only defined on the update selection, which is returned by the [data](Selections#data) operator. The exit selection defines all the normal operators, though typically the main one you'll want to use is [remove](Selections#remove); the other operators exist primarily so you can define an exiting transition as desired. Note that the *exit* operator merely returns a reference to the exit selection, and it is up to you to remove the new nodes.
+
+As a simple example, consider updating the six DIV elements created in the above example for the enter operator. Here we bind those elements to a new array of data with some new and some old:
+
+```javascript
+var div = d3.select("body").selectAll("div")
+   .data([1, 2, 4, 8, 16, 32], function(d) { return d; });
+```
+
+Now `div`—the result of the data operator—refers to the updating selection. Since we specified a key function using the identity function, and the new data array contains the numbers [4, 8, 16] which also exist in the old data array, this updating selection contains three DIV elements. Let's say we leave those elements as-is. We can instantiate and add the new elements [1, 2, 32] using the enter selection:
+
+```javascript
+div.enter().append("div")
+   .text(function(d) { return d; });
+```
+
+Likewise, we can remove the exiting elements [15, 23, 42]:
+
+```javascript
+div.exit().remove();
+```
+
+Now the document body looks like this:
+
+```html
+<div>4</div>
+<div>8</div>
+<div>16</div>
+<div>1</div>
+<div>2</div>
+<div>32</div>
+```
+
+Note that the DOM elements are now out-of-order. However, the selection index `i` (the second argument to operator functions), will correctly match the new data array. For example, we could assign an index attribute:
+
+```javascript
+d3.selectAll("div").attr("index", function(d, i) { return i; });
+```
+
+This would result in:
+
+```html
+<div index="2">4</div>
+<div index="3">8</div>
+<div index="4">16</div>
+<div index="0">1</div>
+<div index="1">2</div>
+<div index="5">32</div>
+```
+
+If you want the document traversal order to match the selection data order, you can use [sort](#sort) or [order](#order).

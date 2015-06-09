@@ -1,0 +1,5 @@
+d3.touches
+
+
+
+Returns the *x* and *y* coordinates of each touch associated with the current [d3.event](#d3_event), based on the [[touches|http://developer.apple.com/library/safari/documentation/UserExperience/Reference/TouchEventClassReference/TouchEvent/TouchEvent.html#//apple_ref/javascript/instp/TouchEvent/touches]] attribute, relative to the specified *container*. The container may be an HTML or SVG container element, such as an svg:g or svg:svg. The coordinates are returned as an array of two-element arrays [ [ *x1*, *y1*], [ *x2*, *y2*], … ]. If *touches* is specified, returns the positions of the specified touches; if *touches* is not specified, it defaults to the `touches` property on the current event.

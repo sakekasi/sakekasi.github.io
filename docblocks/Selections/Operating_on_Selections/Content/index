@@ -1,0 +1,3 @@
+### [Content]($updocblocks/Selections/Operating_on_Selections/index)
+
+D3 has a variety of operators which affect the document content. These are what you'll use the most to display data! When used to set document content, the operators return the current selection, so you can chain multiple operators together in a concise statement.

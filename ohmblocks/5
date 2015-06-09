@@ -1,0 +1,36 @@
+There are two kinds of rules in Ohm:
+
+* Lexical rules, whose names begin with a lower-case letter, and
+* Syntactic rules, whose names begin with an upper-case letter.
+
+The difference between lexical and syntactic rules is that syntactic rules implicitly skip whitespace characters. Here, a "whitespace character" is anything that matches the grammar's `space` rule. By default, you get a "vanilla" implementation of `space` that matches characters like ' ', '\t', '\n', '\r', etc., but you're free to override `space` to suit the language you're creating. (E.g., you may want it to consume comments, the syntax of which is up to you.)
+
+Here's the `PriExp` rule from our arithmetic grammar:
+
+```
+PriExp
+  = "(" Exp ")"
+  | "+" PriExp
+  | "-" PriExp
+  | ident
+  | number
+```
+
+Because `PriExp` is a syntactic rule, it matches "spacey" inputs like the following example:
+
+`g.match(' (  \t123   ) ', 'PriExp').succeeded();`
+
+Note that you can optionally specify a "start rule" of a match by passing its name as the 2nd argument to the `match` method, as shown above. When you don't specify a start rule, `match()` uses the grammar's *default start rule*, which is the first rule in the grammar's declaration. That's `Exp` for our arithmetic grammar.
+
+Anyway, without support for syntactic rules, rules like `PriExp` would have to skip whitespace characters explicitly, which can be tedious and error-prone, and often obscures the meaning of the rule. E.g., here is what the `PriExp` rule would look like if it weren't a syntactic rule:
+
+```
+priExp
+  = space* "(" exp space* ")"
+  | space* "+" priExp
+  | space* "-" priExp
+  | space* ident
+  | space* number
+```
+
+Note that `exp` -- the lexical version of the `Exp` in our arithmetic grammar (not shown) -- would also have to skip whitespace characters explicitly.

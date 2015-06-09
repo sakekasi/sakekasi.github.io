@@ -1,0 +1,34 @@
+[
+  {
+    "block": 3,
+    "text": "Prefer Sizzle, if available."
+  },
+  {
+    "block": 6,
+    "text": "subcomponents for the selection section. For more info, see [#Selections](docblocks/Selections/index)"
+  },
+  {
+    "block": 6,
+    "text": "TODO: allow for association with multiple blocks"
+  },
+  {
+    "block": 6,
+    "text": "TODO: fix block positioning"
+  },
+  {
+    "block": 6,
+    "text": "TODO: do example for ohm in this environment"
+  },
+  {
+    "block": 6,
+    "text": "TODO: label blocks with some kind of context (filename for code)"
+  },
+  {
+    "block": 6,
+    "text": "TODO: mechanism for collapsing columns"
+  },
+  {
+    "block": 6,
+    "text": "DONE: add mechanism to retain state for column layers"
+  }
+]

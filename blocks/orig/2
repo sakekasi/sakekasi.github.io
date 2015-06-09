@@ -1,0 +1,4 @@
+function d3_selection(groups) {
+  d3_subclass(groups, d3_selectionPrototype);
+  return groups;
+}

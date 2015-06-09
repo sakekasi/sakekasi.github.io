@@ -1,0 +1,36 @@
+#### [selection.datum]($updocblocks/Selections/Operating_on_Selections/Data/index)
+
+
+
+Gets or sets the bound data for each selected element. Unlike the [selection.data](#data) method, this method does not compute a join (and thus does not compute enter and exit selections). This method is implemented on top of [selection.property](#property):
+
+```js
+d3.selection.prototype.datum = function(value) {
+ return arguments.length < 1
+     ? this.property("__data__")
+     : this.property("__data__", value);
+};
+```
+
+If *value* is specified, sets the element's bound data to the specified value on all selected elements. If *value* is a constant, all elements are given the same data; otherwise, if *value* is a function, then the function is evaluated for each selected element, being passed the previous datum `d` and the current index `i`, with the `this` context as the current DOM element. The function is then used to set each element's data. A null value will delete the bound data. This operator has no effect on the index.
+
+If *value* is not specified, returns the bound datum for the first non-null element in the selection. This is generally useful only if you know the selection contains exactly one element.
+
+Note: this method was previously called "map". The old name is deprecated.
+
+The `datum` method is useful for accessing HTML5 [custom data attributes](http://www.w3.org/TR/html5/dom.html#custom-data-attribute) with D3. For example, given the following elements:
+
+```html
+<ul id="list">
+ <li data-username="shawnbot">Shawn Allen</li>
+ <li data-username="mbostock">Mike Bostock</li>
+</ul>
+```
+
+You can expose the custom data attributes to D3 by setting each element’s data as the built-in [dataset](http://www.w3.org/TR/html5/dom.html#dom-dataset) property:
+
+```javascript
+selection.datum(function() { return this.dataset; })
+```
+
+This can then be used, [for example](http://bl.ocks.org/1323729), to sort elements by username.

@@ -1,0 +1,82 @@
+.columnLayer {
+  display        : -webkit-flex;
+  display        : flex;
+  -webkit-flex-direction : row;
+  flex-direction : row;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap      : nowrap;
+
+  position       : absolute;
+  y              : 0;
+
+  height         : 100%;
+}
+
+.mainColumn{
+  width          : 700px;
+  min-width      : 700px;
+}
+
+.sideColumn{
+  width          : 250px;
+  min-width      : 250px;
+}
+
+.mainColumn, .sideColumn{
+  -webkit-flex-direction : column;
+  flex-direction         : column;
+}
+
+.columnSet{
+  flex-direction : row;
+  height         : 100%;
+  border-right   : 3px dashed hsla(0,0%,0%,0.5);
+  padding        : 5px;
+}
+
+.column {
+  display        : -webkit-flex;
+  display        : flex;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap      : nowrap;
+  margin-left    : 5px;
+  margin-right   : 5px;
+}
+
+
+.block {
+  position       : relative;
+  border         : 1px solid black;
+  margin         : 4px;
+  padding        : 10px;
+  background-color: white;
+}
+
+pre, code {
+  font-size      : 15px;
+  font-family    : luculent, monospace;
+}
+
+.commentBlock {
+  font-size      : 15px;
+  font-family    : helvetica, sans-serif;
+  background-color: white;
+}
+
+.import {
+  color          : blue;
+}
+
+.import:hover {
+  cursor         : pointer;
+}
+
+body {
+  background-color : hsl(0,0%,90%);
+  font-family: helvetica, sans-serif;
+  font-size: 16px;
+}
+
+.block > :first-child {
+  margin-top: 0px;
+}

@@ -1,0 +1,5 @@
+selection.empty
+
+
+
+Returns true if the current selection is empty; a selection is empty if it contains no elements or only null elements.

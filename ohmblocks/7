@@ -1,0 +1,7 @@
+But a semantics without any operations or attributes is not very interesting: it doesn't do anything! Let's add an operation to our semantics that can be used to evaluate the arithmetic expressions:
+
+```
+var constants = {pi: Math.PI, e: Math.E};
+s.addOperation(
+    'interpret',
+```

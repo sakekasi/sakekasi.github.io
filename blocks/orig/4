@@ -1,0 +1,5 @@
+if (typeof Sizzle === "function") {
+  d3_select = function(s, n) { return Sizzle(s, n)[0] || null; };
+  d3_selectAll = Sizzle;
+  d3_selectMatches = Sizzle.matchesSelector;
+}

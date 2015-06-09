@@ -1,0 +1,25 @@
+#### [selection.filter]($updocblocks/Selections/Operating_on_Selections/index)
+
+
+
+Filters the selection, returning a new selection that contains only the elements for which the specified *selector* is true. The *selector* may be specified either as a function or as a selector string, such as ".foo". As with other operators, the function is passed the current datum `d` and index `i`, with the `this` context as the current DOM element. Filter should only be called on selections with DOM elements bound, e.g. from [append](Selections#append) or [insert](Selections#insert). To bind elements to only a subset of the data, call the built-in array [[filter|https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/Filter]] on the argument to [data](Selections#data). Like the built-in function, D3's filter *does not* preserve the index of the original selection in the returned selection; it returns a copy with elements removed. If you want to preserve the index, use [select](Selections#select) instead.
+
+For example, to select every element with an odd index (relative to the zero-based index):
+
+```javascript
+var odds = selection.select(function(d, i) { return i & 1 ? this : null; });
+```
+
+Equivalently, using a filter function:
+
+```javascript
+var odds = selection.filter(function(d, i) { return i & 1; });
+```
+
+Or a filter selector (noting that the :nth-child pseudo-class is a one-based index rather than a zero-based index):
+
+```javascript
+var odds = selection.filter(":nth-child(even)");
+```
+
+Thus, you can use either select or filter to apply operators to a subset of elements.

@@ -1,0 +1,9 @@
+You can use a grammar's `match()` method to to recognize inputs. `match()` returns a `MatchResult`, which (among other things) can tell you if it succeeded or failed. E.g.,
+
+```
+g.match('1+2*3').succeeded();
+g.match('1+2*3').failed();
+
+g.match('I CAN HAS CHEEZBURGER?').succeeded();
+g.match('I CAN HAS CHEEZBURGER?').failed();
+```
