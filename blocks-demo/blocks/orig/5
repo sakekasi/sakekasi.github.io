@@ -1,5 +1,0 @@
-d3.selection = function() {
-  return d3.select(d3_document.documentElement);
-};
-
-var d3_selectionPrototype = d3.selection.prototype = [];
