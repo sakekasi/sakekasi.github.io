@@ -1,0 +1,14 @@
+@import url("fonts/stylesheet.css");
+
+body {
+    margin: 100px 400px;
+    font-family: 'fira_sansregular';
+}
+
+h1 {
+    font-family: 'fira_sansbold';
+}
+
+ul {
+  list-style-type: none; 
+}
