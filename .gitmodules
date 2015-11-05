@@ -1,3 +1,6 @@
 [submodule "albers-io"]
 	path = albers-io
 	url = https://github.com/sakekasi/albers-io.git
+[submodule "blocks-prototype"]
+	path = blocks-prototype
+	url = https://github.com/sakekasi/blocks-prototype.git
