@@ -13,11 +13,23 @@ h2 {
   color: hsl(0, 0%, 50%);
 }
 
+h2 > a {
+  color: hsl(0, 0%, 30%);
+}
+
 a {
   text-decoration: none;
-  color: hsl(0, 0%, 30%);
+  color: hsl(222, 95%, 46%);
 }
 
 ul {
   list-style-type: none;
+}
+
+#title {
+  margin-bottom: 0px;
+}
+
+#subtitle {
+  margin-top: 0px;
 }
