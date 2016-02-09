@@ -1,0 +1,84 @@
+body{
+  width: 500px;
+  font-family: junction;
+  line-height: 1.3;
+}
+
+grammar {
+  display: block;
+}
+
+grammar > ident, semantics > name {
+  font-size: 20px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+rule {
+  display: block;
+  margin: 20px 20px;
+  width: calc(100% - 40);
+  white-space: pre;
+  word-wrap: break-word;
+}
+
+rule:first-of-type{
+  margin: 0px 20px;
+}
+
+tag {
+  color: cornflowerblue;
+}
+
+rule > ident {
+  color: hsl(0, 0%, 50%);
+  font-weight: bold;
+  font-size: 18px;
+}
+
+alt{
+  margin-left: 10px;
+}
+
+op, str{
+  color: hsl(0,0%, 60%);
+  font-weight: bold;
+}
+
+comment {
+  padding: 20px;
+  display: block;
+  font-style: italic;
+  font-size: 12px;
+  /*white-space: pre;*/
+  width: calc(100% - 40);
+  word-wrap: break-word;
+}
+
+columns {
+  display: flex;
+  flex-direction:row;
+  width: 700px;
+}
+
+column {
+  display: block;
+  height: 100%;
+  border-right: 1px solid black;
+  min-width: 500px;
+  padding-left: 10px;
+}
+
+action {
+  font-family: luculent;
+  display: block;
+/*   padding: 10px 20px; */
+  white-space: pre;
+  position:absolute;
+  top: 0;
+  margin-bottom: 2px;
+}
+
+action.last {
+  margin-bottom: 10px;
+}
