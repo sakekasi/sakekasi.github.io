@@ -6,7 +6,85 @@
 <columns>
 
 <column id="grammar">
-<Grammar>
+<grammar><name>Arithmetic</name>
+  <rules>
+    <rule><name>Exp</name>
+      <ruledefinebody>
+        <alt><choice><seq><app>AddExp</app></seq></choice></alt>
+      </ruledefinebody>
+    </rule>
+
+    <rule><name>AddExp</name>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><app>AddExp</app><string><span>+</span></string><app>MulExp</app></seq><casename>plus</casename></choice>
+          <choice><seq><app>AddExp</app><string><span>-</span></string><app>MulExp</app></seq><casename>minus</casename></choice>
+          <choice><seq><app>MulExp</app></seq></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+    <rule><name>MulExp</name>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><app>MulExp</app><string><span>*</span></string><app>ExpExp</app></seq><casename>times</casename></choice>
+          <choice><seq><app>MulExp</app><string><span>/</span></string><app>ExpExp</app></seq><casename>divide</casename></choice>
+          <choice><seq><app>ExpExp</app></seq></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+    <rule><name>ExpExp</name>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><app>PriExp</app><string><span>^</span></string><app>ExpExp</app></seq><casename>power</casename></choice>
+          <choice><seq><app>PriExp</app></seq></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+    <rule><name>PriExp</name>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><string><span>(</span></string><app>Exp</app><string><span>)</span></string></seq><casename>paren</casename></choice>
+          <choice><seq><string><span>+</span></string><app>PriExp</app></seq><casename>pos</casename></choice>
+          <choice><seq><string><span>-</span></string><app>PriExp</app></seq><casename>neg</casename></choice>
+          <choice><seq><app>ident</app></seq></choice><choice><seq><app>number</app></seq></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+    <Comment>/*
+      The following rules have *descriptions*, which are optional parenthesized "comments" following
+      the name of a rule in its declaration. rule descriptions are used to produce better error
+      messages when the input is not recognized. E.g., if you try to match the input "123" with the
+      `ident` rule below, Ohm will say that "an identifier" was expected. Without `ident`'s rule
+      description, the error message would have said that "a letter" was expected -- which is true,
+      but probably too low-level to be helpful. Note that `letter`, `alnum`, and `digit` are built-in
+      rules with their own descriptions (you can see their declarations in src/built-in-rules.ohm).
+    */</Comment>
+
+    <rule><name>ident</name><description>an identifier</description>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><app>letter</app><star><app>alnum</app></star></seq></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+    <rule><name>number</name><description>a number literal</description>
+      <ruledefinebody>
+        <alt>
+          <choice><seq><star><app>digit</app></star><string><span>.</span></string><plus><app>digit</app></plus></seq><casename>fract</casename></choice>
+          <choice><seq><plus><app>digit</app></plus></seq><casename>whole</casename></choice>
+        </alt>
+      </ruledefinebody>
+    </rule>
+
+  </rules>
+</grammar>
+
+<!-- <Grammar>
 <ident>Arithmetic</ident> {
 
 <Rule><ident>Exp</ident>
@@ -14,26 +92,26 @@
 </Rule>
 
 <Rule><ident>AddExp</ident>
-  <Alt><op>=</op> <ident>AddExp</ident> <str>&ldquo;+&rdquo;</str> <ident>MulExp</ident>  <tag>-- plus</tag></Alt>
-  <Alt><op>|</op> <ident>AddExp</ident> <str>&ldquo;-&rdquo;</str> <ident>MulExp</ident>  <tag>-- minus</tag></Alt>
+  <Alt><op>=</op> <ident>AddExp</ident> <str>&ldquo;<contents>+</contents>&rdquo;</str> <ident>MulExp</ident>  <tag>&mdash; plus</tag></Alt>
+  <Alt><op>|</op> <ident>AddExp</ident> <str>&ldquo;<contents>-</contents>&rdquo;</str> <ident>MulExp</ident>  <tag>&mdash; minus</tag></Alt>
   <Alt><op>|</op> <ident>MulExp</ident></Alt>
 </Rule>
 
 <Rule><ident>MulExp</ident>
-  <alt><op>=</op> <ident>MulExp</ident> <str>&ldquo;*&rdquo;</str> <ident>ExpExp</ident>  <tag>-- times</tag></alt>
-  <alt><op>|</op> <ident>MulExp</ident> <str>&ldquo;/&rdquo;</str> <ident>ExpExp</ident>  <tag>-- divide</tag></alt>
+  <alt><op>=</op> <ident>MulExp</ident> <str>&ldquo;<contents>*</contents>&rdquo;</str> <ident>ExpExp</ident>  <tag>&mdash; times</tag></alt>
+  <alt><op>|</op> <ident>MulExp</ident> <str>&ldquo;<contents>/</contents>&rdquo;</str> <ident>ExpExp</ident>  <tag>&mdash; divide</tag></alt>
   <alt><op>|</op> <ident>ExpExp</ident></alt>
 </Rule>
 
 <Rule><ident>ExpExp</ident>
-  <alt><op>=</op> <ident>PriExp</ident> <str>&ldquo;^&rdquo;</str> <ident>ExpExp</ident>  <tag>-- power</tag></alt>
+  <alt><op>=</op> <ident>PriExp</ident> <str>&ldquo;<contents>^</contents>&rdquo;</str> <ident>ExpExp</ident>  <tag>&mdash; power</tag></alt>
   <alt><op>|</op> <ident>PriExp</ident></alt>
 </Rule>
 
 <Rule><ident>PriExp</ident>
-  <alt><op>=</op> <str>&ldquo;(&rdquo;</str> <ident>Exp</ident> <str>&ldquo;)&rdquo;</str>  <tag>-- paren</tag></alt>
-  <alt><op>|</op> <str>&ldquo;+&rdquo;</str> <ident>PriExp</ident>   <tag>-- pos</tag></alt>
-  <alt><op>|</op> <str>&ldquo;-&rdquo;</str> <ident>PriExp</ident>   <tag>-- neg</tag></alt>
+  <alt><op>=</op> <str>&ldquo;<contents>(</contents>&rdquo;</str> <ident>Exp</ident> <str>&ldquo;<contents>)</contents>&rdquo;</str>  <tag>&mdash; paren</tag></alt>
+  <alt><op>|</op> <str>&ldquo;<contents>+</contents>&rdquo;</str> <ident>PriExp</ident>   <tag>&mdash; pos</tag></alt>
+  <alt><op>|</op> <str>&ldquo;<contents>-</contents>&rdquo;</str> <ident>PriExp</ident>   <tag>&mdash; neg</tag></alt>
   <alt><op>|</op> <ident>ident</ident></alt>
   <alt><op>|</op> <ident>number</ident></alt>
 </Rule>
@@ -53,12 +131,12 @@
 </Rule>
 
 <Rule><ident>number</ident>  <tag>(a number)</tag>
-  <alt><op>=</op> <ident>digit</ident><op>*</op> <str>&ldquo;.&rdquo;</str> <ident>digit</ident><op>+</op>  <tag>-- fract</tag></alt>
-  <alt><op>|</op> <ident>digit</ident><op>+</op>             <tag>-- whole</tag></alt>
+  <alt><op>=</op> <ident>digit</ident><op>*</op> <str>&ldquo;<contents>.</contents>&rdquo;</str> <ident>digit</ident><op>+</op>  <tag>&mdash; fract</tag></alt>
+  <alt><op>|</op> <ident>digit</ident><op>+</op>             <tag>&mdash; whole</tag></alt>
 </Rule>
 
 }
-</Grammar>
+</Grammar> -->
 </column>
 
 <column id="semantics">
