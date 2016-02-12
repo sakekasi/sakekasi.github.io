@@ -215,9 +215,15 @@ function moveToIdealNonOverlapping(actions, preferredItem, transition){
 
   var height = Array.prototype.slice.call(
     sortedActions.map(function(){
-      return $(this).outerHeight(true);
+      // return $(this).outerHeight(true);
+      console.log(this.getBoundingClientRect().height);
+      return Math.floor(this.getBoundingClientRect().height +
+        parseInt($(this).css("margin-top"), 10) +
+        parseInt($(this).css("margin-bottom"), 10));
     })
   );
+
+  console.log(height.length, height, sortedActions.length);
 
   var err = function(y, i){ //for now. should weight this
     return weights[i] * Math.abs(ideal[i] - y);
@@ -229,7 +235,7 @@ function moveToIdealNonOverlapping(actions, preferredItem, transition){
   };
 
   var maxY = Math.floor(ideal.slice(-1)[0] + 1000);
-  var minY = -1000;
+  var minY = 0;
 
   var OPT = [];
   for(var y = minY; y <= maxY; y++){

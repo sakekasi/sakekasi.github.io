@@ -37,14 +37,24 @@ column {
 }
 
 action {
+  transform: scale(0.5) translateX(-50%);
+  -webkit-transform: scale(0.5) translateX(-50%);
+  -o-transform: scale(0.5) translateX(-50%);
+  -moz-transform: scale(0.5) translateX(-50%);
+}
+
+action {
   font-size: 13px;
   font-family: "input serif compressed", monospace;
-  font-weight: bold;
+  /*font-weight: bold;*/
   display: block;
   white-space: pre;
   position:absolute;
   top: 0;
-  margin-bottom: 2px;
+  margin-bottom: 10px;
+  /*border-bottom: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: hsla(0, 0%, 100%, 50%);*/
 }
 
 action.last {
@@ -168,7 +178,7 @@ ruleExtendBody > alt > choice {
 }
 
 choice {
-  display: inline-block;
+  display: inline;
 }
 
 ruleDefineBody > alt > choice > *,
@@ -331,10 +341,11 @@ str::after {
 string {
   /*font-family: Monaco;*/
   font-weight: bold;
+  color: hsl(0, 0%, 35%);
 }
 
 specialChar {
-  color: hsl(248, 53%, 58%);
+  color: hsl(248, 30%, 30%);
 }
 
 charClass {
