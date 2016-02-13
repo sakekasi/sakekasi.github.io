@@ -51,6 +51,7 @@ action {
   white-space: pre;
   position:absolute;
   top: 0;
+  transition: all 0.1s ease;
   margin-bottom: 10px;
   /*border-bottom: 1px;
   border-bottom-style: solid;
@@ -315,13 +316,13 @@ arr::after {
   content: ']';
 }
 
-str::before,
-string::before {
+grammar str::before,
+grammar string::before {
   content: "\201C";
 }
 
-str::after,
-string::after {
+grammar str::after,
+grammar string::after {
   content: "\201D";
 }
 
@@ -330,15 +331,15 @@ prim {
   _font-size: 85%;
 }
 
-string::before,
-string::after,
-str::before,
-str::after {
+grammar string::before,
+grammar string::after,
+grammar str::before,
+grammar str::after {
   /*font-family: "PT Sans", Arial, Helvetica, sans-serif;*/
   color: hsl(0, 0%, 70%);
 }
 
-string {
+grammar string {
   /*font-family: Monaco;*/
   font-weight: bold;
   color: hsl(0, 0%, 35%);
@@ -359,4 +360,19 @@ charClass::after {
   font-style: italic;
   vertical-align: super;
   content: 'RE';
+}
+
+/*SEMANTICS STYLING*/
+semantics keyword,
+semantics punctuator,
+semantics string {
+  font-weight: bold;
+}
+
+semantics punctuator {
+  color: hsla(162, 100%, 33%, 1);
+}
+
+semantics keyword {
+  color: hsla(162, 50%, 33%, 1);
 }

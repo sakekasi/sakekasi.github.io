@@ -13,6 +13,11 @@ $(document).ready(function(){
 
   $(idents[currentIdent]).css("background-color", identColor);
 
+  $('action').each(function(){
+    var reified = reifyAST($(this).text());
+    $(this).html(reified);
+  });
+
   $(document).keypress(function(){
     console.log("key pressed");
     $(idents[currentIdent++ % idents.length]).css("background-color", unHighlightedColor);
@@ -298,4 +303,111 @@ function compare(a, b){
   } else {
     return 0;
   }
+}
+
+function getWithInit(object, key, defaultValue){
+  if(!object.hasOwnProperty(key)){
+    object[key] = defaultValue;
+  }
+
+  return object[key];
+}
+
+function mapObject(object, fun){
+  var out = {};
+  Object.keys(object).forEach(function(key){
+    out[key] = fun(object[key]);
+  });
+
+  return out;
+}
+
+function mergeObjects(a, b, fun){
+  var out = {};
+  Object.keys(a).forEach(function(key){
+    if(b.hasOwnProperty(key)){
+      out[key] = fun(a[key], b[key]);
+    } else {
+      out[key] = a[key];
+    }
+  });
+
+  return Object.assign({}, b, out); //if conflict between b and out, prefer out.
+}
+
+function reifyAST(jsProgram){
+  var AST = esprima.parse(jsProgram, {range: true, tokens: true, tolerant: true});
+  var tokens = AST.tokens;
+  delete AST.tokens;
+  var openTagPositions = {},
+      closeTagPositions = {};
+
+  // tokens get first priority
+  tokens.forEach(function(token){
+    var start = token.range[0],
+        end = token.range[1];
+
+    var tagName = token.type;
+
+    if(tagName){
+      getWithInit(openTagPositions, start, []).push(tagName);
+      getWithInit(closeTagPositions, end, []).push(tagName);
+    }
+  });
+
+  //tagnames are inserted bottom-up
+  traverse(AST, {
+    post: function(node){
+      var start = node.range[0],
+          end = node.range[1];
+
+      var tagName = node.type;
+
+      if(tagName){
+        getWithInit(openTagPositions, start, []).push(tagName);
+        getWithInit(closeTagPositions, end, []).push(tagName);
+      }
+    }
+  });
+
+  openTagPositions = mapObject(openTagPositions, function(tags){
+    return tags.reverse().map((tag) => `<${tag}>`).join("");
+  });
+
+  closeTagPositions = mapObject(closeTagPositions, function(tags){
+    return tags.map((tag) => `</${tag}>`).join("");
+  });
+
+  //TODO: this may be incorrect
+  var stringsToInsert = mergeObjects(openTagPositions, closeTagPositions, function(openStr, closeStr){
+    return closeStr + openStr;
+  });
+
+  var positionsToInsert = Object.keys(stringsToInsert);
+  stringsToInsert = Object.keys(stringsToInsert).map((key)=>stringsToInsert[key]);
+
+  var start = 0,
+      end;
+  var splitProgramString = [];
+  while(positionsToInsert.length > 0){
+    end = positionsToInsert.shift();
+    splitProgramString.push(
+      jsProgram.substring(start, end)
+    );
+
+    start = end;
+  }
+  splitProgramString.push(
+    jsProgram.substring(start)
+  );
+
+  var annotatedProgramPieces = [];
+  annotatedProgramPieces.push(splitProgramString.shift());
+  while(stringsToInsert.length > 0){
+    annotatedProgramPieces.push(stringsToInsert.shift());
+    annotatedProgramPieces.push(splitProgramString.shift());
+  }
+  annotatedProgramPieces.push(splitProgramString.shift());
+
+  return annotatedProgramPieces.join("");
 }
