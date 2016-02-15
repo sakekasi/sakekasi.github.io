@@ -60,6 +60,7 @@ action {
   top: 0;
   transition: all 0.1s ease;
   margin-bottom: 10px;
+  /*background-color: hsl(0, 0%, 100%);*/
   /*border-bottom: 1px;
   border-bottom-style: solid;
   border-bottom-color: hsla(0, 0%, 100%, 50%);*/

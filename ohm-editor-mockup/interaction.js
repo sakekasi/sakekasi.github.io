@@ -41,9 +41,9 @@ $(document).ready(function(){
     function(ruleDesc){ return getActionsForRule(ruleDesc.parent()); }, highlightedColor
   );
   $('rule > name, rule > description').mouseover(function(){
-    moveToIdealNonOverlapping($('action'), null, 100);
+    // moveToIdealNonOverlapping($('action'), null, 100);
   }).mouseout(function(){
-    moveToIdealNonOverlapping($('action'), null, 100);
+    // moveToIdealNonOverlapping($('action'), null, 100);
   })
 
   parallelHighlight('action',
@@ -61,14 +61,14 @@ $(document).ready(function(){
     currentIdent = 0;
 
     $(idents[currentIdent]).css("background-color", identColor);
-    moveToIdealNonOverlapping($('action'), null, 100);
+    // moveToIdealNonOverlapping($('action'), null, 100);
   }).mouseout(function(){
     $(idents[currentIdent % idents.length]).css("background-color", unHighlightedColor);
     idents = $('rule > name');
     currentIdent = 0;
 
     $(idents[currentIdent]).css("background-color", identColor);
-    moveToIdealNonOverlapping($('action'), null, 100);
+    // moveToIdealNonOverlapping($('action'), null, 100);
   });
 
   moveToIdealNonOverlapping($('action'));
