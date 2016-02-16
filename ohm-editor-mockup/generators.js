@@ -1,3 +1,5 @@
+'use strict';
+
 window.GENERATORS = {
   Exp,
   AddExp,
