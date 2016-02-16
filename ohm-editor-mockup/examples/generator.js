@@ -161,7 +161,7 @@ window.generators = {
 window.onload = function(){
   var button = document.querySelector("button#next");
   var examples = document.querySelector("examples");
-  var generator = new E(exampledb.E);
+  var generator = E(exampledb.E);
 
   var appendExample = function(){
     var example = generator.next().value;
