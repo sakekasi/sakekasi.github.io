@@ -1387,23 +1387,23 @@
 
 <column id="semantics">
 <semantics>
-  <action ruleId="Program">var ast = ["program"].concat(parts.AST);
-  if (optE.AST.length !== 0) {
-    ast.push(["exprStmt"].concat(optE.AST));
-  }
-  return ast; </action>
-  <action ruleId="ClassDecl">return ["classDecl",
+<action ruleId="Program">var ast = ["program"].concat(parts.AST);
+if (optE.AST.length !== 0) {
+  ast.push(["exprStmt"].concat(optE.AST));
+}
+return ast; </action>
+<action ruleId="ClassDecl">return ["classDecl",
   c.AST,
   s.AST.length !== 0 ? s.AST : "Object",
   ivs.AST]; </action>
-  <action ruleId="InstVarDecls_some">return [n.AST].concat(ns.AST); </action>
-  <action ruleId="InstVarDecls_none">return []; </action>
-  <action ruleId="MethodDecl_nary1" >return ["methodDecl",
+<action ruleId="InstVarDecls_some">return [n.AST].concat(ns.AST); </action>
+<action ruleId="InstVarDecls_none">return []; </action>
+<action ruleId="MethodDecl_nary1" >return ["methodDecl",
   c.AST,
   n.AST,
   fs.AST,
   b.AST]; </action>
-  <action ruleId="MethodDecl_nary2" >return ["methodDecl",
+<action ruleId="MethodDecl_nary2" >return ["methodDecl",
   c.AST,
   ss.AST.reduce(
    function(n, s) {
@@ -1412,92 +1412,98 @@
        s.slice(1); }),
   fs.AST,
   b.AST]; </action>
-  <action ruleId="MethodDecl_binary">return ["methodDecl",
+<action ruleId="MethodDecl_binary">return ["methodDecl",
   c.AST,
   m.AST,
   [f.AST],
   b.AST]; </action>
-  <action ruleId="MainDecl">return ["main", b.AST]; </action>
-  <action ruleId="MethodBody_expr"  >return [["return", e.AST]]; </action>
-  <action ruleId="MethodBody_stmt"  >var ast = ss.AST;
-  if (optE.AST.length !== 0) {
-   ast.push(["exprStmt"].concat(optE.AST));
-  }
-  return ast; </action>
-  <action ruleId="Stmt_varDecls" >return ["varDecls", p.AST].concat(ps.AST); </action>
-  <action ruleId="Stmt_return"   >return ["return", e.AST]; </action>
-  <action ruleId="Stmt_instVarAssign">return ["setInstVar", n.AST, e.AST]; </action>
-  <action ruleId="Stmt_varAssign">return ["setVar", n.AST, e.AST]; </action>
-  <action ruleId="Stmt_expr"     >return ["exprStmt", e.AST]; </action>
-  <action ruleId="VarDeclPart_init" >return [x.AST, e.AST]; </action>
-  <action ruleId="VarDeclPart_noInit">return [x.AST, ["null"]]; </action>
-  <action ruleId="WSendExpr_super"  >return ["super",
+<action ruleId="MainDecl">return ["main", b.AST]; </action>
+<action ruleId="MethodBody_expr"  >return [["return", e.AST]]; </action>
+<action ruleId="MethodBody_stmt"  >var ast = ss.AST;
+if (optE.AST.length !== 0) {
+ ast.push(["exprStmt"].concat(optE.AST));
+}
+return ast; </action>
+<action ruleId="Stmt_varDecls" >return ["varDecls", p.AST].concat(ps.AST); </action>
+<action ruleId="Stmt_return"   >return ["return", e.AST]; </action>
+<action ruleId="Stmt_instVarAssign">return ["setInstVar", n.AST, e.AST]; </action>
+<action ruleId="Stmt_varAssign">return ["setVar", n.AST, e.AST]; </action>
+<action ruleId="Stmt_expr"     >return ["exprStmt", e.AST]; </action>
+<action ruleId="VarDeclPart_init" >return [x.AST, e.AST]; </action>
+<action ruleId="VarDeclPart_noInit">return [x.AST, ["null"]]; </action>
+<action ruleId="WSendExpr_super"  >return ["super",
   ss.AST.reduce(
    function(n, s) {
      return n +
        s.charAt(0).toUpperCase() +
          s.slice(1); })].concat(as.AST); </action>
-  <action ruleId="WSendExpr_send">return ["send",
+<action ruleId="WSendExpr_send">return ["send",
   r.AST,
   ss.AST.reduce(
    function(n, s) {
      return n +
        s.charAt(0).toUpperCase() + s.slice(1);
      })].concat(as.AST); </action>
-  <action ruleId="EqExpr_eq"     >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="OrExpr_or"     >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="AndExpr_and"   >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="RelExpr_rel"   >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="AddExpr_add"   >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="MulExpr_mul"   >return ["send", x.AST, op.AST, y.AST]; </action>
-  <action ruleId="DotExpr_super" >return ["super", m.AST].concat(xs.AST); </action>
-  <action ruleId="DotExpr_send"  >return ["send", r.AST, m.AST].concat(xs.AST);</action>
-  <action ruleId="PriExpr_block" >var ast = ["block", fs.AST];
-  var ss = ss.AST;
-  if (optE.AST.length !== 0) {
-   ss.push(["exprStmt"].concat(optE.AST));
-  }
-  ast.push(ss);
-  return ast; </action>
-  <action ruleId="PriExpr_new"   >return ["new", c.AST].concat(xs.AST); </action>
-  <action ruleId="PriExpr_str"   >return ["string", s.AST]; </action>
-  <action ruleId="PriExpr_ident" >return ["getVar", n.AST]; </action>
-  <action ruleId="PriExpr_number">return ["number", parseFloat(this.interval.contents)]; </action>
-  <action ruleId="PriExpr_this"  >return ["this"]; </action>
-  <action ruleId="PriExpr_true"  >return ["true"]; </action>
-  <action ruleId="PriExpr_false" >return ["false"]; </action>
-  <action ruleId="PriExpr_null"  >return ["null"]; </action>
-  <action ruleId="Actuals_none"  >return []; </action>
-  <action ruleId="Actuals_some"  >return [e.AST].concat(es.AST); </action>
-  <action ruleId="Formals_none"  >return []; </action>
-  <action ruleId="Formals_some"  >return [x.AST].concat(xs.AST); </action>
-  <action ruleId="BFormals_none" >return []; </action>
-  <action ruleId="BFormals_some" >return [x.AST].concat(xs.AST); </action>
-  <action ruleId="ident"  >return this.interval.contents; </action>
-  <action ruleId="className"     >return this.interval.contents; </action>
-  <action ruleId="string" >var chars = [];
-  var idx = 0;
-  cs = cs.AST;
-  while (idx < cs.length) {
-    var c = cs[idx++];
-    if (c === "\\" && idx < cs.length) {
-      c = cs[idx++];
-      switch (c) {
-        case "n": c = "\n"; break;
-        case "t": c = "\t"; break;
-        default: idx--;
-      }
+<action ruleId="EqExpr_eq"     >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="OrExpr_or"     >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="AndExpr_and"   >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="RelExpr_rel"   >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="AddExpr_add"   >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="MulExpr_mul"   >return ["send", x.AST, op.AST, y.AST]; </action>
+<action ruleId="DotExpr_super" >return ["super", m.AST].concat(xs.AST); </action>
+<action ruleId="DotExpr_send"  >return ["send", r.AST, m.AST].concat(xs.AST);</action>
+<action ruleId="PriExpr_block" >var ast = ["block", fs.AST];
+var ss = ss.AST;
+if (optE.AST.length !== 0) {
+ ss.push(["exprStmt"].concat(optE.AST));
+}
+ast.push(ss);
+return ast; </action>
+<action ruleId="PriExpr_new"   >return ["new", c.AST].concat(xs.AST); </action>
+<action ruleId="PriExpr_str"   >return ["string", s.AST]; </action>
+<action ruleId="PriExpr_ident" >return ["getVar", n.AST]; </action>
+<action ruleId="PriExpr_number">return ["number", parseFloat(this.interval.contents)]; </action>
+<action ruleId="PriExpr_this"  >return ["this"]; </action>
+<action ruleId="PriExpr_true"  >return ["true"]; </action>
+<action ruleId="PriExpr_false" >return ["false"]; </action>
+<action ruleId="PriExpr_null"  >return ["null"]; </action>
+<action ruleId="Actuals_none"  >return []; </action>
+<action ruleId="Actuals_some"  >return [e.AST].concat(es.AST); </action>
+<action ruleId="Formals_none"  >return []; </action>
+<action ruleId="Formals_some"  >return [x.AST].concat(xs.AST); </action>
+<action ruleId="BFormals_none" >return []; </action>
+<action ruleId="BFormals_some" >return [x.AST].concat(xs.AST); </action>
+<action ruleId="ident"  >return this.interval.contents; </action>
+<action ruleId="className"     >return this.interval.contents; </action>
+<action ruleId="string" >var chars = [];
+var idx = 0;
+cs = cs.AST;
+while (idx < cs.length) {
+  var c = cs[idx++];
+  if (c === "\\" && idx < cs.length) {
+    c = cs[idx++];
+    switch (c) {
+      case "n": c = "\n"; break;
+      case "t": c = "\t"; break;
+      default: idx--;
     }
-    chars.push(c);
   }
-  return chars.join("");</action>
-
+  chars.push(c);
+}
+return chars.join("");</action>
 </semantics>
+</column>
+
+<column id="examples">
+ <input id="exampleInput" type="text" placeholder="type an example"/>
+ <examples></examples>
 </column>
 
 </columns>
 
 <script src="jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/jquery/esprima/2.7.1/esprima.js"></script>
+<script src="ast-traverse.js"></script>
 <script src="interaction.js"></script>
 
 </body>

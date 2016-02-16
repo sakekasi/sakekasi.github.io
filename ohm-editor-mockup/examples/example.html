@@ -1,0 +1,58 @@
+<html>
+<head>
+<script type="text/ohm-js">
+
+Arithmetic {
+
+E = AE
+
+AE
+  = AE "+" ME -- plus
+  | AE "-" ME -- minus
+  | ME
+
+ME
+  = ME "*" PE -- times
+  | ME "/" PE -- divide
+  | PE
+
+PE
+  = "(" E ")" --paren
+  | n
+
+n = digit+
+
+}
+
+</script>
+<script src="ohm.js"></script>
+<script>
+'use strict';
+window.g = ohm.grammarFromScriptElement();
+window.SEMANTICS = g.semantics();
+
+// SEMANTICS.addOperation("derivation", {
+//   _nonterminal(children){
+//     var step = document.createElement("step");
+//     step.textContent = this.interval.contents;
+//     return [
+//
+//     ]
+//   }
+// })
+
+window.onload = function(){
+  var exampleNode = document.querySelector("example");
+  var example = exampleNode.textContent;
+
+  window.MATCH = g.match(example);
+}
+
+
+</script>
+</head>
+<body>
+<example>1 + 2 * ( 3 - 4 )</example>
+<derivation></derivation>
+</body>
+</html>

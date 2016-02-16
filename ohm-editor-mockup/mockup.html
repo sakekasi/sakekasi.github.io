@@ -1,6 +1,44 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/ohm-js">
+
+  Arithmetic {
+
+  Exp
+    = AddExp
+
+  AddExp
+    = AddExp "+" MulExp -- plus
+    | AddExp "-" MulExp -- minus
+    | MulExp
+
+  MulExp
+    = MulExp "*" ExpExp -- times
+    | MulExp "/" ExpExp -- divide
+    | ExpExp
+
+  ExpExp
+    = PriExp "^" ExpExp -- power
+    | PriExp
+
+  PriExp
+    = "(" Exp ")" --paren
+    | "+" PriExp --pos
+    | "-" PriExp --neg
+    | ident
+    | number
+
+  ident (an identifier)
+    = letter alnum*
+
+  number (a number literal)
+    = digit* "." digit+ --fract
+    | digit+  --whole
+
+  }
+
+  </script>
 </head>
 <body>
 <columns>
@@ -125,10 +163,29 @@ y<op>.</op>interpret<op>(</op><op>)</op><op>;</op></action>
 </semantics>
 </column>
 
+<column id="examples">
+ <input id="exampleInput" type="text" placeholder="type an example"/>
+ <h4>your examples</h4>
+ <examples></examples>
+ <h4>relevant example pieces</h4>
+ <relevantexamples></relevantexamples>
+ <h4>some generated examples</h4>
+ <generatedexamples></generatedexamples>
+</column>
+
+<column>
+<h4>database contents (for debugging purposes ATM)</h4>
+<pre id="exampleOutput"></pre>
+</column>
 </columns>
 
 <script src="jquery-2.2.0.min.js"></script>
+<script src="https://cdn.rawgit.com/jquery/esprima/2.7.1/esprima.js"></script>
+<script src="ast-traverse.js"></script>
+<script src="ohm.js"></script>
 <script src="interaction.js"></script>
+<script src="exampledb.js"></script>
+<script src="generators.js"></script>
 
 </body>
 </html>

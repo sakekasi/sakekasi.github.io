@@ -36,11 +36,29 @@ column {
   padding-left: 10px;
 }
 
+column#examples {
+  display: flex;
+  flex-direction: column;
+}
+
+examples, relevantexamples, generatedexamples {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+action:hover {
+  transform: scale(1.0);
+  -webkit-transform: scale(1.0);
+  -o-transform: scale(1.0);
+  -moz-transform: scale(1.0);
+}
+
 action {
-  transform: scale(0.5) translateX(-50%);
-  -webkit-transform: scale(0.5) translateX(-50%);
-  -o-transform: scale(0.5) translateX(-50%);
-  -moz-transform: scale(0.5) translateX(-50%);
+  transform: scale(0.8) translateX(-10%);
+  -webkit-transform: scale(0.8) translateX(-10%);
+  -o-transform: scale(0.8) translateX(-10%);
+  -moz-transform: scale(0.8) translateX(-10%);
 }
 
 action {
@@ -51,7 +69,9 @@ action {
   white-space: pre;
   position:absolute;
   top: 0;
+  transition: all 0.1s ease;
   margin-bottom: 10px;
+  /*background-color: hsl(0, 0%, 100%);*/
   /*border-bottom: 1px;
   border-bottom-style: solid;
   border-bottom-color: hsla(0, 0%, 100%, 50%);*/
@@ -315,13 +335,13 @@ arr::after {
   content: ']';
 }
 
-str::before,
-string::before {
+grammar str::before,
+grammar string::before {
   content: "\201C";
 }
 
-str::after,
-string::after {
+grammar str::after,
+grammar string::after {
   content: "\201D";
 }
 
@@ -330,15 +350,15 @@ prim {
   _font-size: 85%;
 }
 
-string::before,
-string::after,
-str::before,
-str::after {
+grammar string::before,
+grammar string::after,
+grammar str::before,
+grammar str::after {
   /*font-family: "PT Sans", Arial, Helvetica, sans-serif;*/
   color: hsl(0, 0%, 70%);
 }
 
-string {
+grammar string {
   /*font-family: Monaco;*/
   font-weight: bold;
   color: hsl(0, 0%, 35%);
@@ -359,4 +379,19 @@ charClass::after {
   font-style: italic;
   vertical-align: super;
   content: 'RE';
+}
+
+/*SEMANTICS STYLING*/
+semantics keyword,
+semantics punctuator,
+semantics string {
+  font-weight: bold;
+}
+
+semantics punctuator {
+  color: hsla(162, 0%, 66%, 1);
+}
+
+semantics keyword {
+  color: hsla(162, 0%, 33%, 1);
 }
