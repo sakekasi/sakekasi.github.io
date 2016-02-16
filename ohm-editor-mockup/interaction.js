@@ -18,11 +18,11 @@ $(document).ready(function(){
     $(this).html(reified);
   });
 
-  $(document).keypress(function(){
-    console.log("key pressed");
-    $(idents[currentIdent++ % idents.length]).css("background-color", unHighlightedColor);
-    $(idents[currentIdent % idents.length]).css("background-color", identColor);
-  });
+  // $(document).keypress(function(){
+  //   console.log("key pressed");
+  //   $(idents[currentIdent++ % idents.length]).css("background-color", unHighlightedColor);
+  //   $(idents[currentIdent % idents.length]).css("background-color", identColor);
+  // });
 
   parallelHighlight('rule choice',
     function(ruleChoice){ return ruleChoice.parent(); }, lightHighlightedColor,
@@ -88,14 +88,14 @@ function parallelHighlight(selector /*, accessor, color, ... */){
   }
 
   $(selector).mouseover(function(){
-    console.log(selector, "mouseover");
+    // console.log(selector, "mouseover");
 
     $(this).css("background-color", highlightedColor);
     parallelElements($(this)).forEach(function(element, i){
       element.css("background-color", colors[i]);
     });
   }).mouseout(function(){
-    console.log(selector, "mouseout");
+    // console.log(selector, "mouseout");
 
     $(this).css("background-color", unHighlightedColor);
     parallelElements($(this)).forEach(function(element){
@@ -221,14 +221,14 @@ function moveToIdealNonOverlapping(actions, preferredItem, transition){
   var height = Array.prototype.slice.call(
     sortedActions.map(function(){
       // return $(this).outerHeight(true);
-      console.log(this.getBoundingClientRect().height);
+      // console.log(this.getBoundingClientRect().height);
       return Math.floor(this.getBoundingClientRect().height +
         parseInt($(this).css("margin-top"), 10) +
         parseInt($(this).css("margin-bottom"), 10));
     })
   );
 
-  console.log(height.length, height, sortedActions.length);
+  // console.log(height.length, height, sortedActions.length);
 
   var err = function(y, i){ //for now. should weight this
     return weights[i] * Math.abs(ideal[i] - y);

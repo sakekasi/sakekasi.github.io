@@ -36,6 +36,17 @@ column {
   padding-left: 10px;
 }
 
+column#examples {
+  display: flex;
+  flex-direction: column;
+}
+
+examples, relevantexamples, generatedexamples {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 action:hover {
   transform: scale(1.0);
   -webkit-transform: scale(1.0);
@@ -44,10 +55,10 @@ action:hover {
 }
 
 action {
-  transform: scale(0.5) translateX(-50%);
-  -webkit-transform: scale(0.5) translateX(-50%);
-  -o-transform: scale(0.5) translateX(-50%);
-  -moz-transform: scale(0.5) translateX(-50%);
+  transform: scale(0.8) translateX(-10%);
+  -webkit-transform: scale(0.8) translateX(-10%);
+  -o-transform: scale(0.8) translateX(-10%);
+  -moz-transform: scale(0.8) translateX(-10%);
 }
 
 action {
@@ -378,9 +389,9 @@ semantics string {
 }
 
 semantics punctuator {
-  color: hsla(162, 100%, 33%, 1);
+  color: hsla(162, 0%, 66%, 1);
 }
 
 semantics keyword {
-  color: hsla(162, 50%, 33%, 1);
+  color: hsla(162, 0%, 33%, 1);
 }

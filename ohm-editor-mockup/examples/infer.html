@@ -2,130 +2,27 @@
 <head>
 <script type="text/ohm-js">
 
-O {
+Arithmetic {
 
-  Program
-    = Stmts
+E = AE
 
-  Stmts
-    = Stmt* Exp?
+AE
+  = AE "+" ME -- plus
+  | AE "-" ME -- minus
+  | ME
 
-  Stmt
-    = class ident (extends ident)? (with NonemptyListOf<ident, ",">)? ";"  -- classDecl
-    | def ident "." ident "(" ListOf<ident, ","> ")" MethodBody            -- methodDeclJava
-    | def ident (ident ":" ident)+ MethodBody                              -- methodDeclKeyword
-    | def ident binSelector ident MethodBody                               -- methodDeclBinary
-    | var ident "=" Exp ";"                                                -- varDecl
-    | ident "=" Exp ";"                                                    -- varAssign
-    | this "." ident "=" Exp ";"                                           -- instVarAssign
-    | return Exp ";"                                                       -- return
-    | Exp ";"                                                              -- exp
+ME
+  = ME "*" PE -- times
+  | ME "/" PE -- divide
+  | PE
 
-  MethodBody
-    = "=" Exp ";"    -- exp
-    | "{" Stmts "}"  -- stmt
+PE
+  = "(" E ")" --paren
+  | n
 
-  Exp
-    = KWSendExp
-
-  KWSendExp
-    = EqExp (ident ":" EqExp)+  -- send
-    | super (ident ":" EqExp)+  -- super
-    | EqExp
-
-  EqExp
-    = RelExp ("==" | "!=") RelExp  -- eq
-    | RelExp
-
-  RelExp
-    = AddExp ("<=" | "<" | ">=" | ">") AddExp  -- rel
-    | AddExp
-
-  AddExp
-    = AddExp ("+" | "-") MulExp  -- add
-    | MulExp
-
-  MulExp
-    = MulExp ("*" | "/" | "%") DotExp  -- mul
-    | DotExp
-
-  DotExp
-    = DotExp "." ident "(" Actuals ")"  -- send
-    | super "." ident "(" Actuals ")"   -- super
-    | this "." ident  ~"("              -- instVarAccess
-    | UnExp
-
-  UnExp
-    = "-" PriExp  -- neg
-    | PriExp
-
-  PriExp
-    = "(" Exp ")"                  -- paren
-    | "{" BlockArgNames Stmts "}"  -- block
-    | new ident "(" Actuals ")"    -- new
-    | string                       -- str
-    | ident                        -- ident
-    | number                       -- number
-    | this                         -- this
-    | trueK                        -- true
-    | falseK                       -- false
-    | nullK                        -- null
-
-  Actuals
-    = ListOf<Exp, ",">
-
-  BlockArgNames
-    = ListOf<ident, ","> "|"  -- some
-    |                         -- none
-
-  // Lexical rules
-
-  ident  (an identifier)
-    = ~keyword letter alnum*
-
-  string  (a string literal)
-    = "\"" (~"\"" ~"\n" any)* "\""
-
-  number  (a number literal)
-    = digit* "." digit+  -- fract
-    | digit+             -- whole
-
-  binSelector  (a binary selector)
-    = "===" | "==" | "!==" | "!=" | "<=" | "<" | ">=" | ">"
-    | "+"   | "-"  | "*"   | "/"  | "%"
-
-  class = "class" ~alnum
-  def = "def" ~alnum
-  else = "else" ~alnum
-  extends = "extends" ~alnum
-  falseK = "false" ~alnum
-  if = "if" ~alnum
-  new = "new" ~alnum
-  nullK = "null" ~alnum
-  return = "return" ~alnum
-  super = "super" ~alnum
-  then = "then" ~alnum
-  this = "this" ~alnum
-  trueK = "true" ~alnum
-  var = "var" ~alnum
-  with = "with" ~alnum
-
-  keyword
-    = class | def | else | extends | falseK | if | new | nullK | return | super
-    | then | this | trueK | var | with
-
-  space
-   += comment
-
-  comment
-    = "/*" (~"*/" any)* "*/"  -- multiLine
-    | "//" (~"\n" any)*       -- singleLine
-
-  tokens
-    = (keyword | ident | number | comment | any)*
+n = digit+
 
 }
-
 
 </script>
 <script src="ohm.js"></script>
@@ -150,129 +47,27 @@ column {
 <columns>
 <column>
   <pre>
-    O {
+Arithmetic {
 
-      Program
-        = Stmts
+E = AE
 
-      Stmts
-        = Stmt* Exp?
+AE
+  = AE "+" ME -- plus
+  | AE "-" ME -- minus
+  | ME
 
-      Stmt
-        = class ident (extends ident)? (with NonemptyListOf<ident, ",">)? ";"  -- classDecl
-        | def ident "." ident "(" ListOf<ident, ","> ")" MethodBody            -- methodDeclJava
-        | def ident (ident ":" ident)+ MethodBody                              -- methodDeclKeyword
-        | def ident binSelector ident MethodBody                               -- methodDeclBinary
-        | var ident "=" Exp ";"                                                -- varDecl
-        | ident "=" Exp ";"                                                    -- varAssign
-        | this "." ident "=" Exp ";"                                           -- instVarAssign
-        | return Exp ";"                                                       -- return
-        | Exp ";"                                                              -- exp
+ME
+  = ME "*" PE -- times
+  = ME "/" PE -- divide
+  | PE
 
-      MethodBody
-        = "=" Exp ";"    -- exp
-        | "{" Stmts "}"  -- stmt
+PE
+  = "(" E ")" --paren
+  | n
 
-      Exp
-        = KWSendExp
+n = digit+
 
-      KWSendExp
-        = EqExp (ident ":" EqExp)+  -- send
-        | super (ident ":" EqExp)+  -- super
-        | EqExp
-
-      EqExp
-        = RelExp ("==" | "!=") RelExp  -- eq
-        | RelExp
-
-      RelExp
-        = AddExp ("<=" | "<" | ">=" | ">") AddExp  -- rel
-        | AddExp
-
-      AddExp
-        = AddExp ("+" | "-") MulExp  -- add
-        | MulExp
-
-      MulExp
-        = MulExp ("*" | "/" | "%") DotExp  -- mul
-        | DotExp
-
-      DotExp
-        = DotExp "." ident "(" Actuals ")"  -- send
-        | super "." ident "(" Actuals ")"   -- super
-        | this "." ident  ~"("              -- instVarAccess
-        | UnExp
-
-      UnExp
-        = "-" PriExp  -- neg
-        | PriExp
-
-      PriExp
-        = "(" Exp ")"                  -- paren
-        | "{" BlockArgNames Stmts "}"  -- block
-        | new ident "(" Actuals ")"    -- new
-        | string                       -- str
-        | ident                        -- ident
-        | number                       -- number
-        | this                         -- this
-        | trueK                        -- true
-        | falseK                       -- false
-        | nullK                        -- null
-
-      Actuals
-        = ListOf<Exp, ",">
-
-      BlockArgNames
-        = ListOf<ident, ","> "|"  -- some
-        |                         -- none
-
-      // Lexical rules
-
-      ident  (an identifier)
-        = ~keyword letter alnum*
-
-      string  (a string literal)
-        = "\"" (~"\"" ~"\n" any)* "\""
-
-      number  (a number literal)
-        = digit* "." digit+  -- fract
-        | digit+             -- whole
-
-      binSelector  (a binary selector)
-        = "===" | "==" | "!==" | "!=" | "<=" | "<" | ">=" | ">"
-        | "+"   | "-"  | "*"   | "/"  | "%"
-
-      class = "class" ~alnum
-      def = "def" ~alnum
-      else = "else" ~alnum
-      extends = "extends" ~alnum
-      falseK = "false" ~alnum
-      if = "if" ~alnum
-      new = "new" ~alnum
-      nullK = "null" ~alnum
-      return = "return" ~alnum
-      super = "super" ~alnum
-      then = "then" ~alnum
-      this = "this" ~alnum
-      trueK = "true" ~alnum
-      var = "var" ~alnum
-      with = "with" ~alnum
-
-      keyword
-        = class | def | else | extends | falseK | if | new | nullK | return | super
-        | then | this | trueK | var | with
-
-      space
-       += comment
-
-      comment
-        = "/*" (~"*/" any)* "*/"  -- multiLine
-        | "//" (~"\n" any)*       -- singleLine
-
-      tokens
-        = (keyword | ident | number | comment | any)*
-
-    }
+}
   </pre>
 </column>
 
