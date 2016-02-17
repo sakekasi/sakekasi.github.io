@@ -7,6 +7,23 @@ body{
   font-kerning: normal;
 }
 
+input {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  
+  outline: none;
+  box-shadow: none;
+  
+  border: none;
+  
+  border-bottom: 1px solid black;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 10px;
+}
+
 grammar > name, semantics > name {
   font-size: 18px;
   font-style: italic;

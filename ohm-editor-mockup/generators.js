@@ -1,3 +1,5 @@
+'use strict';
+
 window.GENERATORS = {
   Exp,
   AddExp,
@@ -286,7 +288,7 @@ function* arrayInfGen(...gens){
 }
 
 function* concatInfGen(...gens){
-  for(items of arrayInfGen(...gens)){
+  for(let items of arrayInfGen(...gens)){
     yield items.join("");
   }
 }
