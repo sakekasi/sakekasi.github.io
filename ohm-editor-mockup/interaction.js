@@ -21,9 +21,9 @@ $(document).ready(function(){
   });
 
   $('rule choice').each(function(i){
-    var lightnessDecrement = ((i % 5)+4) * 1.5;
-    $(this).css("background-color", `hsl(0, 0%, ${98-lightnessDecrement}%)`);
-    getAction($(this)).css("background-color", `hsl(0, 0%, ${98-lightnessDecrement}%)`);
+    var lightnessDecrement = ((i+4) % 5) * 1;
+    $(this).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`);
+    getAction($(this)).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`); //205
   })
 
   // $(document).keypress(function(){
