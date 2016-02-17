@@ -20,11 +20,22 @@ $(document).ready(function(){
     $(this).html(reified);
   });
 
-  $('rule choice').each(function(i){
-    var lightnessDecrement = ((i+4) % 5) * 1;
-    $(this).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`);
-    getAction($(this)).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`); //205
+  $('rule').each(function(){
+    $(this).find('choice').each(function(i){
+      var index = ((i+0) % 5);
+      // var lightnessDecrement = Math.exp(index) / Math.exp(4) * 5;
+      var lightnessDecrement = index / 4 * 5;
+      $(this).css("background-color", `hsl(33, 50%, ${100-lightnessDecrement}%)`);
+      getAction($(this)).css("background-color", `hsl(33, 50%, ${100-lightnessDecrement}%)`); //205
+    });
   })
+  // $('rule choice').each(function(i){
+  //   var index = ((i+4) % 5);
+  //   // var lightnessDecrement = Math.exp(index) / Math.exp(4) * 5;
+  //   var lightnessDecrement = index / 4 * 5;
+  //   $(this).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`);
+  //   getAction($(this)).css("background-color", `hsl(33, 50%, ${99-lightnessDecrement}%)`); //205
+  // })
 
   // $(document).keypress(function(){
   //   console.log("key pressed");
