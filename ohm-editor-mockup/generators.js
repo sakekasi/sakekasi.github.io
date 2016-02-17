@@ -266,20 +266,15 @@ function* letter(letters){
 //UTILS
 
 function* stochasticChooseGen(...gens){
-  let histogram = gens.map(()=>0);
+  let weights = gens.map(()=>1);
   while(true){
-    // let sum = histogram.reduce((a, b)=> a+b);
-    // let distToSum = histogram.map(x=> sum - x);
-    // let sum2 = distToSum.reduce((a, b)=> a+b);
-    // let probabilities = distToSum.map(x=> x/sum2);
+    let sum = weights.reduce((a, b)=> a+b);
 
-    let choice = Math.floor(Math.random()*gens.length);
-    let i = choice;
-    // for(i=0; choice > probabilities[i]; i++ ){
-    //   choice -= probabilities[i];
-    // }
+    let choice = Math.random()*sum;
+    let i;
+    for(i = 0; choice > weights[i]; choice -= weights[i++]){}
 
-    histogram[i]++;
+    weights[i] /= 2;
     yield gens[i].next().value;
   }
 }

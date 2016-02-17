@@ -33,7 +33,7 @@ column {
   display: block;
   height: 100%;
   min-width: 500px;
-  padding-left: 10px;
+  padding-left: 0px;
 }
 
 column#examples {
@@ -47,34 +47,56 @@ examples, relevantexamples, generatedexamples {
   width: 100%;
 }
 
-action:hover {
+rule choice:hover,
+rule choice.hover,
+rule.hover {
+  background-color: hsl(0, 0%, 80%) !important;
+}
+
+rule.parentHover {
+  background-color: hsl(0, 0%, 97%) !important;
+}
+
+action:hover,
+action.hover {
+  background-color: hsl(0, 0%, 80%) !important;
+
   transform: scale(1.0);
   -webkit-transform: scale(1.0);
   -o-transform: scale(1.0);
   -moz-transform: scale(1.0);
+
+  z-index: 1;
+  opacity: 0.9;
 }
 
 action {
-  transform: scale(0.8) translateX(-10%);
-  -webkit-transform: scale(0.8) translateX(-10%);
-  -o-transform: scale(0.8) translateX(-10%);
-  -moz-transform: scale(0.8) translateX(-10%);
+  transform-origin: 0 0;
+
+  transform: scale(0.8);
+  -webkit-transform: scale(0.8);
+  -o-transform: scale(0.8);
+  -moz-transform: scale(0.8);
+
+  z-index: 0;
 }
 
 action {
   font-size: 13px;
   font-family: "input serif compressed", monospace;
-  /*font-weight: bold;*/
   display: block;
   white-space: pre;
-  position:absolute;
+  position: relative;
   top: 0;
-  transition: all 0.1s ease;
+  transition: top 0.1s, background-color 0.1s, transform 0.1s;
+  transition-timing-function: ease;
+  /*transition: transform 0.2s ease;
+  transition: top 0.2s ease;*/
+  padding-left:  10px;
+  padding-top: 5px;
   margin-bottom: 10px;
-  /*background-color: hsl(0, 0%, 100%);*/
-  /*border-bottom: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: hsla(0, 0%, 100%, 50%);*/
+  padding-bottom: 5px;
+  width: inherit;
 }
 
 action.last {
@@ -172,10 +194,13 @@ caseName::before {
 rule {
   margin-top: 12pt;
   margin-bottom: 12pt;
+  /* padding-left:  10px; */
 }
 
 alt {
   font-size: 15px;
+  width:  100%;
+  /* display: inline-block; */
 }
 
 ruleDefineBody,
@@ -187,18 +212,25 @@ ruleExtendBody {
 ruleDefineBody > alt,
 ruleOverrideBody > alt,
 ruleExtendBody > alt {
-  display: table;
+  display: flex;
   border-collapse: collapse;
+  flex-direction: column;
 }
 
 ruleDefineBody > alt > choice,
 ruleOverrideBody > alt > choice,
 ruleExtendBody > alt > choice {
-  display: table-row;
+  display: flex;
+  flex-direction: row;
 }
 
 choice {
   display: inline;
+  width: calc(100% - 10);
+  /* float:  left; */
+  align-content: stretch;
+  margin-left:  10px;
+  /* align-items: initial; */
 }
 
 ruleDefineBody > alt > choice > *,
@@ -394,4 +426,10 @@ semantics punctuator {
 
 semantics keyword {
   color: hsla(162, 0%, 33%, 1);
+}
+
+
+semantics {
+    width: initial;
+    display:  block;
 }
