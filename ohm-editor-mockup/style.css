@@ -53,6 +53,23 @@ column {
   min-width: 400px;
   padding-left: 0px;
   padding-top: 20px;
+
+  transition: filter 0.2s ease;
+  -o-transition: -o-filter 0.2s ease;
+  -moz-transition: -moz-filter 0.2s ease;
+  -webkit-transition: -webkit-filter 0.2s ease;
+
+  -filter: saturate(50%);
+  -o-filter: saturate(50%);
+  -moz-filter: saturate(50%);
+  -webkit-filter: saturate(50%);
+}
+
+column:hover {
+    filter: saturate(100%);
+    -o-filter: saturate(100%);
+    -moz-filter: saturate(100%);
+    -webkit-filter: saturate(100%);
 }
 
 column#examples {
