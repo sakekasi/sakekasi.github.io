@@ -1,6 +1,6 @@
 'use strict';
 
-var g = ohm.grammarFromScriptElement();
+window.g = ohm.grammarFromScriptElement();
 
 function inferExamples(example){
   var examples = {};

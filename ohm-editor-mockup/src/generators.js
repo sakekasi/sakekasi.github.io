@@ -1,7 +1,9 @@
 'use strict';
 var EXAMPLES = require("./exampledb.js"),
     $ = require("jquery"),
-    makeExample = require("./example.js");
+    makeExample = require("./example.js"),
+    grammar = require('./language.js').grammar,
+    entropy = require("./diversity.js").entropy;
 
 let GENERATORS = {
   Exp,
@@ -376,12 +378,28 @@ function setGeneratedExamples(ruleName){
   node.textContent = "";
   if(generator){
     let i;
-    // for(i=0; i < 50; i++, generator.next()){}
+    for(i=0; i < 50; i++, generator.next()){}
+    let examples = []
     for(i = 0; i < 10; i++){
-      let example = generator.next().value;
-      let exampleNode = makeExample(example);
-      node.appendChild(exampleNode);
+      examples.push(generator.next().value);
     }
+
+    // let exampleSet = new Set(examples.map(example =>{
+    //   try{
+    //     return grammar.match(example, ruleName)._cst;
+    //   } catch(e) {
+    //     return null;
+    //   }
+    // }).filter(item=>item));
+    //
+    // let e = entropy(exampleSet, "ctorName");
+    // let entropyNode = document.createElement("span");
+    // entropyNode.textContent = `ENTROPY: ${e}`;
+    // node.appendChild(entropyNode);
+
+    examples.map(makeExample).forEach(exampleNode =>{
+      node.appendChild(exampleNode);
+    });
   }
 }
 
