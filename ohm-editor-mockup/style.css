@@ -5,6 +5,24 @@ body{
   font-family: "aleo", serif;
   line-height: 1.3;
   font-kerning: normal;
+  font-size: 15px;
+}
+
+input {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+
+  outline: none;
+  box-shadow: none;
+
+  border: none;
+
+  border-bottom: 1px solid black;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 10px;
 }
 
 grammar > name, semantics > name {
@@ -32,13 +50,32 @@ columns {
 column {
   display: block;
   height: 100%;
-  min-width: 500px;
-  padding-left: 10px;
+  min-width: 400px;
+  padding-left: 0px;
+  padding-top: 20px;
+
+  transition: filter 0.5s ease;
+  -o-transition: -o-filter 0.5s ease;
+  -moz-transition: filter 0.5s ease;
+  -webkit-transition: -webkit-filter 0.5s ease;
+
+  filter: saturate(50%);
+  -o-filter: saturate(50%);
+  -moz-filter: saturate(50%);
+  -webkit-filter: saturate(50%);
+}
+
+column:hover {
+    filter: saturate(100%);
+    -o-filter: saturate(100%);
+    -moz-filter: saturate(100%);
+    -webkit-filter: saturate(100%);
 }
 
 column#examples {
-  display: flex;
+  display: block;
   flex-direction: column;
+  padding-right: 15px;
 }
 
 examples, relevantexamples, generatedexamples {
@@ -47,34 +84,53 @@ examples, relevantexamples, generatedexamples {
   width: 100%;
 }
 
-action:hover {
+rule choice:hover,
+rule choice.hover,
+rule.hover,
+rule.hover.parentHover {
+  background-color: hsla(49,80%,92%,1) !important;
+}
+
+rule.parentHover {
+  background-color: hsl(0, 0%, 97%) !important;
+}
+
+action:hover,
+action.hover {
+  background-color: hsla(49,80%,92%,1) !important;
   transform: scale(1.0);
   -webkit-transform: scale(1.0);
   -o-transform: scale(1.0);
   -moz-transform: scale(1.0);
+  z-index: 1;
+  opacity: 0.9;
 }
 
 action {
-  transform: scale(0.8) translateX(-10%);
-  -webkit-transform: scale(0.8) translateX(-10%);
-  -o-transform: scale(0.8) translateX(-10%);
-  -moz-transform: scale(0.8) translateX(-10%);
+  transform-origin: 0 0;
+  transform: scale(0.8);
+  -webkit-transform: scale(0.8);
+  -o-transform: scale(0.8);
+  -moz-transform: scale(0.8);
+  z-index: 0;
 }
 
 action {
   font-size: 13px;
   font-family: "input serif compressed", monospace;
-  /*font-weight: bold;*/
   display: block;
   white-space: pre;
-  position:absolute;
+  position: relative;
   top: 0;
-  transition: all 0.1s ease;
+  transition: top 0.1s, background-color 0.1s, transform 0.1s;
+  transition-timing-function: ease;
+  /*transition: transform 0.2s ease;
+  transition: top 0.2s ease;*/
+  padding-left:  10px;
+  padding-top: 5px;
   margin-bottom: 10px;
-  /*background-color: hsl(0, 0%, 100%);*/
-  /*border-bottom: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: hsla(0, 0%, 100%, 50%);*/
+  padding-bottom: 5px;
+  width: inherit;
 }
 
 action.last {
@@ -149,7 +205,7 @@ rule > name {
   font-size: 16px;
 }
 
-description, caseName {
+caseName {
   color: hsl(219, 58%, 70%);
   font-style: italic;
 }
@@ -172,10 +228,13 @@ caseName::before {
 rule {
   margin-top: 12pt;
   margin-bottom: 12pt;
+  /* padding-left:  10px; */
 }
 
 alt {
   font-size: 15px;
+  width:  100%;
+  /* display: inline-block; */
 }
 
 ruleDefineBody,
@@ -187,18 +246,25 @@ ruleExtendBody {
 ruleDefineBody > alt,
 ruleOverrideBody > alt,
 ruleExtendBody > alt {
-  display: table;
+  display: flex;
   border-collapse: collapse;
+  flex-direction: column;
 }
 
 ruleDefineBody > alt > choice,
 ruleOverrideBody > alt > choice,
 ruleExtendBody > alt > choice {
-  display: table-row;
+  display: flex;
+  flex-direction: row;
 }
 
 choice {
   display: inline;
+  width: calc(100% - 10);
+  /* float:  left; */
+  align-content: stretch;
+  margin-left:  10px;
+  /* align-items: initial; */
 }
 
 ruleDefineBody > alt > choice > *,
@@ -209,6 +275,8 @@ ruleExtendBody > alt > choice > * {
 
 description {
   display: inline-block;
+  font-style: italic;
+  color: hsla(219,61%,34%,1);
 }
 
 ruleDefineBody > alt::before,
@@ -394,4 +462,29 @@ semantics punctuator {
 
 semantics keyword {
   color: hsla(162, 0%, 33%, 1);
+}
+
+
+semantics {
+    width: initial;
+    display:  block;
+}
+
+
+column#semantics {
+    /* margin-right: -80px; */
+}
+
+input#exampleInput {
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    width: 100%;
+}
+
+h4 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 17px;
+    margin-bottom: 5px;
 }

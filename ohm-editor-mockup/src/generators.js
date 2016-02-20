@@ -1,6 +1,14 @@
 'use strict';
+var EXAMPLES = require("./exampledb.js"),
+    $ = require("jquery"),
+    makeExample = require("./example.js"),
+    grammar = require('./language.js').grammar,
+    diversity_fns = require("./diversity.js");
 
-window.GENERATORS = {
+let diversity = diversity_fns.diversity;
+let distance_pq = diversity_fns.distance_pq;
+
+let GENERATORS = {
   Exp,
   AddExp,
   AddExp_plus,
@@ -18,6 +26,12 @@ window.GENERATORS = {
   number,
   number_whole,
   number_fract
+};
+
+if(typeof module !== "undefined" && typeof module.exports !== "undefined"){
+  module.exports = GENERATORS;
+} else {
+  window.GENERATORS = GENERATORS;
 }
 
 function* Exp(es){
@@ -268,20 +282,15 @@ function* letter(letters){
 //UTILS
 
 function* stochasticChooseGen(...gens){
-  let histogram = gens.map(()=>0);
+  let weights = gens.map(()=>1);
   while(true){
-    // let sum = histogram.reduce((a, b)=> a+b);
-    // let distToSum = histogram.map(x=> sum - x);
-    // let sum2 = distToSum.reduce((a, b)=> a+b);
-    // let probabilities = distToSum.map(x=> x/sum2);
+    let sum = weights.reduce((a, b)=> a+b);
 
-    let choice = Math.floor(Math.random()*gens.length);
-    let i = choice;
-    // for(i=0; choice > probabilities[i]; i++ ){
-    //   choice -= probabilities[i];
-    // }
+    let choice = Math.random()*sum;
+    let i;
+    for(i = 0; choice > weights[i]; choice -= weights[i++]){}
 
-    histogram[i]++;
+    weights[i] /= 2;
     yield gens[i].next().value;
   }
 }
@@ -363,3 +372,119 @@ function shuffle(array) {
 
   return array;
 }
+
+//DOM STUFF
+function setGeneratedExamples(ruleName){
+  console.log(ruleName);
+  let generator = GENERATORS[ruleName]([]);
+  let node = document.querySelector('generatedexamples');
+  node.textContent = "";
+  if(generator){
+    let diverseExamples = [];
+    let averageDiversity = 0;
+    let numSeen = 0;
+    while(numSeen < 50){
+      let size = diverseExamples.length;
+      let example = generator.next().value;
+      let exampleCST;
+      let match;
+
+      match = grammar.match(example, ruleName);
+      exampleCST = match._cst;
+      exampleCST.originalText = example;
+
+      let exampleDiversity=0;
+      if(size > 0){
+        exampleDiversity = diversity(example, diverseExamples, "ctorName");
+        exampleCST.diversity = exampleDiversity;
+      }
+
+      if(size === 0 || exampleDiversity > averageDiversity){
+        if(size >= 10){
+          let leastDiversity = diverseExamples.reduce((a, b)=> a.diversity < b.diversity? a: b);
+          averageDiversity -= leastDiversity.diversity / diverseExamples.length;
+          diverseExamples.forEach((example)=>{
+            example.diversity -=
+              // Math.pow(distance_pq(leastDiversity, example, "ctorName"), 2) /
+              leastDiversity.diversity / diverseExamples.length;
+          });
+          diverseExamples.splice(diverseExamples.indexOf(leastDiversity), 1);
+        }
+        //update diversity for each element
+        size = diverseExamples.length;
+        diverseExamples.forEach((example)=>{
+          example.diversity =
+            example.diversity * (size / (size + 1)) +
+            exampleCST.diversity / (size + 1);
+        });
+        averageDiversity =
+          averageDiversity * (size / (size + 1)) +
+          exampleDiversity/ (size + 1);
+        diverseExamples.push(exampleCST);
+      }
+
+      numSeen++;
+    }
+    //
+    // let i;
+    // for(i=0; i < 50; i++, generator.next()){}
+    // let examples = []
+    // for(i = 0; i < 10; i++){
+    //   examples.push(generator.next().value);
+    // }
+
+    // let exampleSet = new Set(examples.map(example =>{
+    //   try{
+    //     return grammar.match(example, ruleName)._cst;
+    //   } catch(e) {
+    //     return null;
+    //   }
+    // }).filter(item=>item));
+    //
+    // let e = entropy(exampleSet, "ctorName");
+    // let entropyNode = document.createElement("span");
+    // entropyNode.textContent = `ENTROPY: ${e}`;
+    // node.appendChild(entropyNode);
+
+    diverseExamples
+      .map(i=>i.originalText)
+      .map(makeExample).forEach(exampleNode =>{
+      node.appendChild(exampleNode);
+    });
+  }
+}
+
+$(document).ready(function(){
+  setGeneratedExamples("Exp");
+
+  document.querySelector("input#exampleInput").addEventListener("keyup", function(e){
+    if(e.code === "Enter"){
+      var example = document.querySelector("#exampleInput").value;
+      exampleChanged(example);
+    }
+  });
+
+  $('rule choice').mouseover(function(){
+    let ruleName = $(this).closest('rule').children('name').text();
+    let caseName = $(this).find('casename');
+    if(caseName.length > 0){
+      ruleName += "_"+caseName.text();
+    } else if($(this).closest('rule').find('alt').get()[0].children.length > 1){
+      ruleName = $(this).find('app').text();
+    }
+
+    // setRelevantExamples(ruleName);
+    setGeneratedExamples(ruleName);
+  });
+
+  $('rule > name').mouseover(function(){
+    let ruleName = $(this).text();
+    // setRelevantExamples(ruleName);
+    setGeneratedExamples(ruleName);
+  });
+
+  $('action').mouseover(function(){
+    let ruleName = $(this).attr('ruleId');
+    setGeneratedExamples(ruleName);
+  });
+});

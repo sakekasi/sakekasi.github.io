@@ -1,11 +1,13 @@
 'use strict';
 
-var g = ohm.grammarFromScriptElement();
+var $ = require("jquery"),
+    language = require("./language.js"),
+    makeExample = require("./example.js");
+
+var g = language.grammar;
+var s = language.semantics;
 
 var examples = {};
-window.EXAMPLES = examples;
-
-var s = g.semantics();
 
 s.addOperation("addExamples", {
   _nonterminal(children){
@@ -34,20 +36,11 @@ function inferExamples(example){
   }
 }
 
-function exampleChanged(example){
+function exampleAdded(example){
   inferExamples(example);
-
-  var exampleNode = document.createElement("example");
-  exampleNode.textContent = example;
-
-  document.querySelector("#exampleInput").value = "";
-
+  var exampleNode = makeExample(example);
   document.querySelector("examples").appendChild(exampleNode);
-  document.querySelector("pre#exampleOutput").textContent = getExampleString();
 }
-
-// window.inferExamples = inferExamples;
-
 
 //UTILS
 function getWithInit(object, key, defaultValue){
@@ -62,7 +55,8 @@ $(document).ready(function(){
   document.querySelector("input#exampleInput").addEventListener("keyup", function(e){
     if(e.code === "Enter"){
       var example = document.querySelector("#exampleInput").value;
-      exampleChanged(example);
+      exampleAdded(example);
+      document.querySelector("#exampleInput").value = "";
     }
   });
 
@@ -74,8 +68,10 @@ $(document).ready(function(){
     "3.14159265"
   ];
   for(let example of examples){
-    exampleChanged(example);
+    exampleAdded(example);
   }
+
+  setRelevantExamples("Exp");
 
   $('rule choice').mouseover(function(){
     let ruleName = $(this).closest('rule').children('name').text();
@@ -87,49 +83,40 @@ $(document).ready(function(){
     }
 
     setRelevantExamples(ruleName);
-    setGeneratedExamples(ruleName);
+    // setGeneratedExamples(ruleName);
   })
 
   $('rule > name').mouseover(function(){
     let ruleName = $(this).text();
     setRelevantExamples(ruleName);
-    setGeneratedExamples(ruleName);
+    // setGeneratedExamples(ruleName);
   })
+
+  $('action').mouseover(function(){
+    let ruleName = $(this).attr('ruleId');
+    setRelevantExamples(ruleName);
+  });
 });
 
 function setRelevantExamples(ruleName){
-  let relevantExamples = EXAMPLES[ruleName];
+  let relevantExamples = examples[ruleName];
   let node = document.querySelector('relevantexamples');
-  node.textContent = "";
+
+  while (node.hasChildNodes()) {
+    node.removeChild(node.lastChild);
+  }
+
   if(relevantExamples){
     for(let example of relevantExamples){
-      let exampleNode = document.createElement('example');
-      exampleNode.textContent = example;
-      node.appendChild(exampleNode);
+      node.appendChild(makeExample(example));
     }
   }
 }
 
-function setGeneratedExamples(ruleName){
-  console.log(ruleName);
-  let generator = GENERATORS[ruleName]([]);
-  let node = document.querySelector('generatedexamples');
-  node.textContent = "";
-  if(generator){
-    let i;
-    for(i=0; i < 50; i++, generator.next()){}
-    for(i = 0; i < 10; i++){
-      let example = generator.next().value;
-      let exampleNode = document.createElement('example');
-      exampleNode.textContent = example;
-      node.appendChild(exampleNode);
-    }
-  }
-}
 
 function getExampleString(){
   return JSON.stringify(
-    EXAMPLES,
+    examples,
     function(k, v){
       if(v instanceof Set){
         var a = [];
@@ -142,4 +129,10 @@ function getExampleString(){
     },
     '  '
   );
+}
+
+if(typeof module !== "undefined" && typeof module.exports !== "undefined"){
+  module.exports = examples;
+} else {
+  window.EXAMPLES = examples;
 }

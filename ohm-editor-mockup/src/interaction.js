@@ -1,74 +1,89 @@
 "use strict";
 
-var highlightedColor = "hsl(0,0%,85%)";
-var lightHighlightedColor = "hsl(0,0%,97%)";
-var unHighlightedColor = "hsla(0,0%,100%, 0)";
+var esprima = require("esprima"),
+    traverse = require("ast-traverse"),
+    $ = require("jquery"),
+    chroma = require("chroma-js");
+
 
 var identColor = "hsla(58, 100%, 80%, 1)"
 
+var focusedItems = null;
 
 $(document).ready(function(){
-  var idents = $('rule > name');
-  var currentIdent = 0;
 
-  $(idents[currentIdent]).css("background-color", identColor);
 
   $('action').each(function(){
     var reified = reifyAST($(this).text());
     $(this).html(reified);
   });
 
-  // $(document).keypress(function(){
-  //   console.log("key pressed");
-  //   $(idents[currentIdent++ % idents.length]).css("background-color", unHighlightedColor);
-  //   $(idents[currentIdent % idents.length]).css("background-color", identColor);
-  // });
+  var scale = chroma.scale(
+    [chroma.hsl(0, 0, 1), chroma.hsl(0, 0, 0.96)]
+  ).domain([0,5])
+  .mode('lch');
+
+  $('rule').each(function(i){
+    $(this).find('choice').each(function(i){
+      var color = scale(i%5);
+      $(this).css("background-color", color.css('hsl'));
+      getAction($(this)).css("background-color", color.css('hsl'));
+    });
+  })
 
   parallelHighlight('rule choice',
-    function(ruleChoice){ return ruleChoice.parent(); }, lightHighlightedColor,
-    function(ruleChoice){ return getAction(ruleChoice); }, highlightedColor
+    function(ruleChoice){ return ruleChoice.parent(); }, "parentHover",
+    function(ruleChoice){ return getAction(ruleChoice); }, "hover"
   );
 
   $('rule choice').mouseover(function(){
     var action = getAction($(this));
-    moveToIdealNonOverlapping($('action'), action.get()[0], 100);
+    moveToIdealNonOverlapping($('action'), action.get()[0]);//, 100);
   }).mouseout(function(){
-    moveToIdealNonOverlapping($('action'), null, 100);
+    moveToIdealNonOverlapping($('action'), null);//, 100);
+  }).click(function(){
+    flipFocusedItems(
+      this,
+      getAction($(this)).get()[0]
+    );
   });
 
   parallelHighlight('rule > name, rule > description',
-    function(ruleDesc){ return ruleDesc.parent(); }, highlightedColor,
-    function(ruleDesc){ return getActionsForRule(ruleDesc.parent()); }, highlightedColor
+    function(ruleDesc){ return ruleDesc.parent(); }, "hover",
+    function(ruleDesc){ return ruleDesc.parent().find("choice"); }, "hover",
+    function(ruleDesc){ return getActionsForRule(ruleDesc.parent()); }, "hover"
   );
   $('rule > name, rule > description').mouseover(function(){
     // moveToIdealNonOverlapping($('action'), null, 100);
   }).mouseout(function(){
     // moveToIdealNonOverlapping($('action'), null, 100);
+  }).click(function(){
+    let rule = $(this).parent();
+    flipFocusedItems(
+      this,
+      rule.get()[0],
+      ...(rule.find('choice').get()),
+      ...(getActionsForRule(rule).get())
+    )
   })
 
   parallelHighlight('action',
-    function(action){ return getRule(action); }, lightHighlightedColor,
+    function(action){ return getRule(action); }, "parentHover",
     function(action){
       return getAlts(action).length === 0?
         getRule(action):
         getAlts(action);
-    }, highlightedColor
+    }, "hover"
   );
   $('action').mouseover(function(){
-    $(idents[currentIdent % idents.length]).css("background-color", unHighlightedColor);
-
-    idents = getRule($(this)).find('choice app');
-    currentIdent = 0;
-
-    $(idents[currentIdent]).css("background-color", identColor);
     // moveToIdealNonOverlapping($('action'), null, 100);
   }).mouseout(function(){
-    $(idents[currentIdent % idents.length]).css("background-color", unHighlightedColor);
-    idents = $('rule > name');
-    currentIdent = 0;
-
-    $(idents[currentIdent]).css("background-color", identColor);
     // moveToIdealNonOverlapping($('action'), null, 100);
+  }).click(function(){
+    flipFocusedItems(
+      this,
+      getAlts($(this)).get()[0]
+    );
   });
 
   moveToIdealNonOverlapping($('action'));
@@ -79,7 +94,7 @@ $(document).ready(function(){
 function parallelHighlight(selector /*, accessor, color, ... */){
   var parallels = Array.prototype.slice.call(arguments, 1);
   var accessors = parallels.filter(function(_, i){ return i%2 === 0; }),
-      colors = parallels.filter(function(_, i){ return i%2 === 1; });
+      classes = parallels.filter(function(_, i){ return i%2 === 1; });
 
   var parallelElements = function(currentElement){
     return accessors.map(function(acc){
@@ -90,20 +105,40 @@ function parallelHighlight(selector /*, accessor, color, ... */){
   $(selector).mouseover(function(){
     // console.log(selector, "mouseover");
 
-    $(this).css("background-color", highlightedColor);
+    $(this).addClass("hover");//css("background-color", highlightedColor);
     parallelElements($(this)).forEach(function(element, i){
-      element.css("background-color", colors[i]);
+      element.addClass(classes[i]);
     });
   }).mouseout(function(){
     // console.log(selector, "mouseout");
-
-    $(this).css("background-color", unHighlightedColor);
-    parallelElements($(this)).forEach(function(element){
-      element.css("background-color", unHighlightedColor);
-    })
+    if(!isFocused(this)){
+      $(this).removeClass("hover");
+      parallelElements($(this)).forEach(function(element, i){
+        element.removeClass(classes[i]);
+      });
+    }
   });
 }
 
+function flipFocusedItems(...nodes){
+  if(focusedItems){
+    let onlyNew = nodes.filter((node)=> !focusedItems.includes(node));
+    if(onlyNew.length > 0){
+      let onlyOld = focusedItems.filter(node=> !nodes.includes(node));
+      focusedItems = nodes;
+      onlyOld.forEach(node=>{
+        $(node).mouseout();
+      });
+
+    } else {
+      focusedItems = null;
+    }
+  } else {
+    focusedItems = nodes;
+  }
+}
+
+var isFocused = (item)=> focusedItems && focusedItems.indexOf(item) !== -1;
 //ACCESSORS
 /////////////
 function getRule(action){
@@ -176,7 +211,7 @@ function moveElementToY(element, y, transition){
       delta = y - current;
 
   if(!transition){
-    element.css("top", top + delta);
+    element.get()[0].style.top = top + delta;//.css("top", )
   } else {
     element.stop().animate({
       top: "+=" + delta.toString()
@@ -410,4 +445,21 @@ function reifyAST(jsProgram){
   annotatedProgramPieces.push(splitProgramString.shift());
 
   return annotatedProgramPieces.join("");
+}
+
+function linearHL(colorRange, domainRange){
+  let colorStart = colorRange[0],
+      colorEnd = colorRange[1];
+  let domainStart = domainRange[0],
+      domainEnd = domainRange[1];
+
+  return function(input){
+    let scaled = (input - domainStart)/(domainEnd - domainStart);
+
+    let h = colorStart.get("hcl.h")+ (scaled * (colorEnd.get("hcl.h")-colorStart.get("hcl.h")));
+    let c = colorStart.get("hcl.c")+ (scaled * (colorEnd.get("hcl.c")-colorStart.get("hcl.c")));
+    let l = colorStart.get("hcl.l")+ (scaled * (colorEnd.get("hcl.l")-colorStart.get("hcl.l")));
+
+    return chroma.hcl(h, c, l);
+  }
 }
