@@ -91,6 +91,11 @@ $(document).ready(function(){
     setRelevantExamples(ruleName);
     // setGeneratedExamples(ruleName);
   })
+
+  $('action').mouseover(function(){
+    let ruleName = $(this).attr('ruleId');
+    setRelevantExamples(ruleName);
+  });
 });
 
 function setRelevantExamples(ruleName){

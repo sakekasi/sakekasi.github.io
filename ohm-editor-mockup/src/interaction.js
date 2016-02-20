@@ -50,12 +50,21 @@ $(document).ready(function(){
 
   parallelHighlight('rule > name, rule > description',
     function(ruleDesc){ return ruleDesc.parent(); }, "hover",
+    function(ruleDesc){ return ruleDesc.parent().find("choice"); }, "hover",
     function(ruleDesc){ return getActionsForRule(ruleDesc.parent()); }, "hover"
   );
   $('rule > name, rule > description').mouseover(function(){
     // moveToIdealNonOverlapping($('action'), null, 100);
   }).mouseout(function(){
     // moveToIdealNonOverlapping($('action'), null, 100);
+  }).click(function(){
+    let rule = $(this).parent();
+    flipFocusedItems(
+      this,
+      rule.get()[0],
+      ...(rule.find('choice').get()),
+      ...(getActionsForRule(rule).get())
+    )
   })
 
   parallelHighlight('action',

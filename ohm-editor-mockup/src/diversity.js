@@ -29,7 +29,7 @@ function diversity(example, set, label = "label", distance = distance_pq){
   set.forEach((item)=>{
     diversity += Math.pow(distance(item, example, label), 2);
   });
-  diversity /= set.size;
+  diversity /= set.length;
 
   return diversity;
 }

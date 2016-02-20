@@ -86,7 +86,8 @@ examples, relevantexamples, generatedexamples {
 
 rule choice:hover,
 rule choice.hover,
-rule.hover {
+rule.hover,
+rule.hover.parentHover {
   background-color: hsla(49,80%,92%,1) !important;
 }
 

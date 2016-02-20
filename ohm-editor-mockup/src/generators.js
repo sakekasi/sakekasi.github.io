@@ -3,7 +3,10 @@ var EXAMPLES = require("./exampledb.js"),
     $ = require("jquery"),
     makeExample = require("./example.js"),
     grammar = require('./language.js').grammar,
-    entropy = require("./diversity.js").entropy;
+    diversity_fns = require("./diversity.js");
+
+let diversity = diversity_fns.diversity;
+let distance_pq = diversity_fns.distance_pq;
 
 let GENERATORS = {
   Exp,
@@ -377,12 +380,58 @@ function setGeneratedExamples(ruleName){
   let node = document.querySelector('generatedexamples');
   node.textContent = "";
   if(generator){
-    let i;
-    for(i=0; i < 50; i++, generator.next()){}
-    let examples = []
-    for(i = 0; i < 10; i++){
-      examples.push(generator.next().value);
+    let diverseExamples = [];
+    let averageDiversity = 0;
+    let numSeen = 0;
+    while(numSeen < 50){
+      let size = diverseExamples.length;
+      let example = generator.next().value;
+      let exampleCST;
+      let match;
+
+      match = grammar.match(example, ruleName);
+      exampleCST = match._cst;
+      exampleCST.originalText = example;
+
+      let exampleDiversity=0;
+      if(size > 0){
+        exampleDiversity = diversity(example, diverseExamples, "ctorName");
+        exampleCST.diversity = exampleDiversity;
+      }
+
+      if(size === 0 || exampleDiversity > averageDiversity){
+        if(size >= 10){
+          let leastDiversity = diverseExamples.reduce((a, b)=> a.diversity < b.diversity? a: b);
+          averageDiversity -= leastDiversity.diversity / diverseExamples.length;
+          diverseExamples.forEach((example)=>{
+            example.diversity -=
+              // Math.pow(distance_pq(leastDiversity, example, "ctorName"), 2) /
+              leastDiversity.diversity / diverseExamples.length;
+          });
+          diverseExamples.splice(diverseExamples.indexOf(leastDiversity), 1);
+        }
+        //update diversity for each element
+        size = diverseExamples.length;
+        diverseExamples.forEach((example)=>{
+          example.diversity =
+            example.diversity * (size / (size + 1)) +
+            exampleCST.diversity / (size + 1);
+        });
+        averageDiversity =
+          averageDiversity * (size / (size + 1)) +
+          exampleDiversity/ (size + 1);
+        diverseExamples.push(exampleCST);
+      }
+
+      numSeen++;
     }
+    //
+    // let i;
+    // for(i=0; i < 50; i++, generator.next()){}
+    // let examples = []
+    // for(i = 0; i < 10; i++){
+    //   examples.push(generator.next().value);
+    // }
 
     // let exampleSet = new Set(examples.map(example =>{
     //   try{
@@ -397,7 +446,9 @@ function setGeneratedExamples(ruleName){
     // entropyNode.textContent = `ENTROPY: ${e}`;
     // node.appendChild(entropyNode);
 
-    examples.map(makeExample).forEach(exampleNode =>{
+    diverseExamples
+      .map(i=>i.originalText)
+      .map(makeExample).forEach(exampleNode =>{
       node.appendChild(exampleNode);
     });
   }
@@ -430,5 +481,10 @@ $(document).ready(function(){
     let ruleName = $(this).text();
     // setRelevantExamples(ruleName);
     setGeneratedExamples(ruleName);
-  })
+  });
+
+  $('action').mouseover(function(){
+    let ruleName = $(this).attr('ruleId');
+    setGeneratedExamples(ruleName);
+  });
 });
