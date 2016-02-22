@@ -374,8 +374,18 @@ function reifyAST(jsProgram){
   var AST = esprima.parse(jsProgram, {range: true, tokens: true, tolerant: true});
   var tokens = AST.tokens;
   delete AST.tokens;
-  var openTagPositions = {},
-      closeTagPositions = {};
+  var tagPositions = {};
+
+  traverse(AST, {
+    pre: function(node){
+      var start = node.range[0];
+      var tagName = node.type;
+
+      if(tagName){
+        getWithInit(tagPositions, start, []).push(`<${tagName}>`);
+      }
+    }
+  }
 
   // tokens get first priority
   tokens.forEach(function(token){
@@ -385,41 +395,34 @@ function reifyAST(jsProgram){
     var tagName = token.type;
 
     if(tagName){
-      getWithInit(openTagPositions, start, []).push(tagName);
-      getWithInit(closeTagPositions, end, []).push(tagName);
+      getWithInit(tagPositions, start, []).push(`<${tagName}>`);
+      getWithInit(tagPositions, end, []).push(`</${tagName}>`);
     }
   });
 
-  //tagnames are inserted bottom-up
   traverse(AST, {
     post: function(node){
-      var start = node.range[0],
-          end = node.range[1];
-
+      var end = node.range[1];
       var tagName = node.type;
 
       if(tagName){
-        getWithInit(openTagPositions, start, []).push(tagName);
-        getWithInit(closeTagPositions, end, []).push(tagName);
+        getWithInit(tagPositions, end, []).push(`</${tagName}>`);
       }
     }
   });
 
-  openTagPositions = mapObject(openTagPositions, function(tags){
-    return tags.reverse().map((tag) => `<${tag}>`).join("");
+
+  tagPositions = mapObject(closeTagPositions, function(tags){
+    return tags.join("");
   });
 
-  closeTagPositions = mapObject(closeTagPositions, function(tags){
-    return tags.map((tag) => `</${tag}>`).join("");
-  });
+  // //TODO: this may be incorrect
+  // var stringsToInsert = mergeObjects(openTagPositions, closeTagPositions, function(openStr, closeStr){
+  //   return closeStr + openStr;
+  // });
 
-  //TODO: this may be incorrect
-  var stringsToInsert = mergeObjects(openTagPositions, closeTagPositions, function(openStr, closeStr){
-    return closeStr + openStr;
-  });
-
-  var positionsToInsert = Object.keys(stringsToInsert);
-  stringsToInsert = Object.keys(stringsToInsert).map((key)=>stringsToInsert[key]);
+  var positionsToInsert = Object.keys(tagPositions);
+  var stringsToInsert = Object.keys(tagPositions).map((key)=>tagPositions[key]);
 
   var start = 0,
       end;

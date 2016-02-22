@@ -2,9 +2,17 @@
 
 var semantics = null;
 
+function closeTag(tagName){
+  return `</${tagName}>`;
+}
+
+function openTag(tagName){
+  return `<${tagName}>`;
+}
+
+
 function reify(grammar, example){
-  let openTagPositions = {},
-      closeTagPositions = {};
+  let tagPositions = {};
   let domToOhm = new Map(),
       ohmToDom = new Map();
 
@@ -12,14 +20,13 @@ function reify(grammar, example){
     semantics = grammar.semantics();
     semantics.addOperation("reifyAST", {
       _nonterminal(children){
-        children.forEach(child=> child.reifyAST());
-
         let start = this.interval.startIdx,
             end = this.interval.endIdx;
         let tagName = this._node.ctorName;
 
-        getWithInit(openTagPositions, start, []).push(tagName);
-        getWithInit(closeTagPositions, end, []).push(tagName);
+        getWithInit(tagPositions, start, []).push(openTag(tagName));
+        children.forEach(child=> child.reifyAST());
+        getWithInit(tagPositions, end, []).push(closeTag(tagName));
       }
     });
 
@@ -62,21 +69,12 @@ function reify(grammar, example){
 
   semmatch.reifyAST();
 
-  openTagPositions = mapObject(openTagPositions, function(tags){
-    return tags.reverse().map((tag) => `<${tag}>`).join("");
+  tagPositions = mapObject(tagPositions, function(tags){
+    return tags.join("");
   });
 
-  closeTagPositions = mapObject(closeTagPositions, function(tags){
-    return tags.map((tag) => `</${tag}>`).join("");
-  });
-
-  //TODO: this may be incorrect
-  var stringsToInsert = mergeObjects(openTagPositions, closeTagPositions, function(openStr, closeStr){
-    return closeStr + openStr;
-  });
-
-  var positionsToInsert = Object.keys(stringsToInsert);
-  stringsToInsert = Object.keys(stringsToInsert).map((key)=>stringsToInsert[key]);
+  var positionsToInsert = Object.keys(tagPositions);
+  var stringsToInsert = Object.keys(tagPositions).map((key)=>tagPositions[key]);
 
   var start = 0,
       end;

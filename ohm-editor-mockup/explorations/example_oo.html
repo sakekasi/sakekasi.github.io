@@ -128,8 +128,6 @@ O {
 
 
 </script>
-<script src="ohm.js"></script>
-<script src="infer.js"></script>
 <style>
 columns {
   display: flex;
@@ -140,7 +138,7 @@ columns {
 column {
   display: block;
   height: 100%;
-  min-width: 500px;
+  min-width: 800px;
   padding-left: 10px;
 }
 </style>
@@ -324,6 +322,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   exampleNode.textContent = "";
   exampleNode.appendChild(DOM);
+
+  window.DOM2OHM = domToOhm;
+  window.OHM2DOM = ohmToDom;
 });
 </script>
 </body>
