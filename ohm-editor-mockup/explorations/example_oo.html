@@ -15,6 +15,7 @@ O {
     | def ident "." ident "(" ListOf<ident, ","> ")" MethodBody            -- methodDeclJava
     | def ident (ident ":" ident)+ MethodBody                              -- methodDeclKeyword
     | def ident binSelector ident MethodBody                               -- methodDeclBinary
+    | def ident "(" ListOf<ident, ","> ")" MethodBody                      -- methodDeclCall
     | var ident "=" Exp ";"                                                -- varDecl
     | ident "=" Exp ";"                                                    -- varAssign
     | this "." ident "=" Exp ";"                                           -- instVarAssign
@@ -56,7 +57,11 @@ O {
     | UnExp
 
   UnExp
-    = "-" PriExp  -- neg
+    = "-" CallExp  -- neg
+    | CallExp
+
+  CallExp
+    = CallExp "(" Actuals ")"  -- call
     | PriExp
 
   PriExp
@@ -91,28 +96,23 @@ O {
     | digit+             -- whole
 
   binSelector  (a binary selector)
-    = "===" | "==" | "!==" | "!=" | "<=" | "<" | ">=" | ">"
-    | "+"   | "-"  | "*"   | "/"  | "%"
+    = "==" | "!=" | "<=" | "<" | ">=" | ">" | "+"  | "-"  | "*"  | "/" | "%" | "@"
 
   class = "class" ~alnum
   def = "def" ~alnum
-  else = "else" ~alnum
   extends = "extends" ~alnum
   falseK = "false" ~alnum
-  if = "if" ~alnum
   new = "new" ~alnum
   nullK = "null" ~alnum
   return = "return" ~alnum
   super = "super" ~alnum
-  then = "then" ~alnum
   this = "this" ~alnum
   trueK = "true" ~alnum
   var = "var" ~alnum
   with = "with" ~alnum
 
   keyword
-    = class | def | else | extends | falseK | if | new | nullK | return | super
-    | then | this | trueK | var | with
+    = class | def | extends | falseK | new | nullK | return | super | this | trueK | var | with
 
   space
    += comment
@@ -125,7 +125,6 @@ O {
     = (keyword | ident | number | comment | any)*
 
 }
-
 
 </script>
 <style>
@@ -140,6 +139,14 @@ column {
   height: 100%;
   min-width: 800px;
   padding-left: 10px;
+}
+
+.current[result="success"]{
+  color: green;
+}
+
+.current[result="error"]{
+  color: red;
 }
 </style>
 </head>
@@ -161,6 +168,7 @@ column {
         | def ident "." ident "(" ListOf<ident, ","> ")" MethodBody            -- methodDeclJava
         | def ident (ident ":" ident)+ MethodBody                              -- methodDeclKeyword
         | def ident binSelector ident MethodBody                               -- methodDeclBinary
+        | def ident "(" ListOf<ident, ","> ")" MethodBody                      -- methodDeclCall
         | var ident "=" Exp ";"                                                -- varDecl
         | ident "=" Exp ";"                                                    -- varAssign
         | this "." ident "=" Exp ";"                                           -- instVarAssign
@@ -202,7 +210,11 @@ column {
         | UnExp
 
       UnExp
-        = "-" PriExp  -- neg
+        = "-" CallExp  -- neg
+        | CallExp
+
+      CallExp
+        = CallExp "(" Actuals ")"  -- call
         | PriExp
 
       PriExp
@@ -237,28 +249,23 @@ column {
         | digit+             -- whole
 
       binSelector  (a binary selector)
-        = "===" | "==" | "!==" | "!=" | "<=" | "<" | ">=" | ">"
-        | "+"   | "-"  | "*"   | "/"  | "%"
+        = "==" | "!=" | "<=" | "<" | ">=" | ">" | "+"  | "-"  | "*"  | "/" | "%" | "@"
 
       class = "class" ~alnum
       def = "def" ~alnum
-      else = "else" ~alnum
       extends = "extends" ~alnum
       falseK = "false" ~alnum
-      if = "if" ~alnum
       new = "new" ~alnum
       nullK = "null" ~alnum
       return = "return" ~alnum
       super = "super" ~alnum
-      then = "then" ~alnum
       this = "this" ~alnum
       trueK = "true" ~alnum
       var = "var" ~alnum
       with = "with" ~alnum
 
       keyword
-        = class | def | else | extends | falseK | if | new | nullK | return | super
-        | then | this | trueK | var | with
+        = class | def | extends | falseK | new | nullK | return | super | this | trueK | var | with
 
       space
        += comment
@@ -307,15 +314,26 @@ def ThreeDeePoint.toString() {
 
 <script src="../lib/ohm.js"></script>
 <script src="reify.js"></script>
+<script src="mapSemantics.js"></script>
+<script src="classes.js"></script>
+<script src="toAST.js"></script>
 <script>
 'use strict';
 
 document.addEventListener("DOMContentLoaded", function(event) {
   let grammar = ohm.grammarFromScriptElement();
 
+  let semantics = grammar.semantics();
+
+  registerReifyActions(semantics);
+  registerToAST(semantics);
+  registerMapSemantics(grammar, semantics);
+
   let exampleNode = document.querySelector('pre#example');
   let example = exampleNode.textContent;
-  let reified = reify(grammar, example);
+  let match = grammar.match(example);
+
+  let reified = reify(semantics, match);
   let DOM = reified[0],
       domToOhm = reified[1],
       ohmToDom = reified[2];
@@ -325,6 +343,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   window.DOM2OHM = domToOhm;
   window.OHM2DOM = ohmToDom;
+
+  let nodeToResults = mapSemantics(semantics, "toAST", match);
+
+  for(let key of nodeToResults.keys()){
+    let domNode = ohmToDom.get(key);
+    let result = nodeToResults.get(key);
+
+    domNode.setAttribute("result", result instanceof Error? "error": "success");
+  }
+
+  DOM.classList.add("current");
+
 });
 </script>
 </body>

@@ -1,7 +1,5 @@
 'use strict';
 
-var semantics = null;
-
 function closeTag(tagName){
   return `</${tagName}>`;
 }
@@ -10,47 +8,40 @@ function openTag(tagName){
   return `<${tagName}>`;
 }
 
+function registerReifyActions(semantics){
+  semantics.addOperation("reifyAST(tagPositions)", {
+    _nonterminal(children){
+      let start = this.interval.startIdx,
+      end = this.interval.endIdx;
+      let tagName = this._node.ctorName;
 
-function reify(grammar, example){
-  let tagPositions = {};
-  let domToOhm = new Map(),
-      ohmToDom = new Map();
+      getWithInit(this.args.tagPositions, start, []).push(openTag(tagName));
+      children.forEach(child=> child.reifyAST(this.args.tagPositions));
+      getWithInit(this.args.tagPositions, end, []).push(closeTag(tagName));
+    }
+  });
 
-  if(!semantics){
-    semantics = grammar.semantics();
-    semantics.addOperation("reifyAST", {
-      _nonterminal(children){
-        let start = this.interval.startIdx,
-            end = this.interval.endIdx;
-        let tagName = this._node.ctorName;
+  semantics.addOperation("mapDOM(DOMNode, domToOhm, ohmToDom)", {
+    _nonterminal(children){
+      console.log(this._node.ctorName);
+      this.args.domToOhm.set(this.args.DOMNode, this._node);
+      this.args.ohmToDom.set(this._node, this.args.DOMNode);
 
-        getWithInit(tagPositions, start, []).push(openTag(tagName));
-        children.forEach(child=> child.reifyAST());
-        getWithInit(tagPositions, end, []).push(closeTag(tagName));
-      }
-    });
-
-    semantics.addOperation("mapDOM(DOMNode)", {
-      _nonterminal(children){
-        console.log(this._node.ctorName);
-        domToOhm.set(this.args.DOMNode, this._node);
-        ohmToDom.set(this._node, this.args.DOMNode);
-
-        let DOMChildren = Array.prototype.slice.apply(this.args.DOMNode.children);
-        for(let i=0; i < children.length; i++){
-          let child = children[i];
-          console.log(child._node.ctorName, child._node.constructor.name);
-          if(child._node.ctorName === "_iter"
-             && !(child._node.children.length > 0
-                  && child._node.children[0].constructor.name === "TerminalNode")){
+      let DOMChildren = Array.prototype.slice.apply(this.args.DOMNode.children);
+      for(let i=0; i < children.length; i++){
+        let child = children[i];
+        console.log(child._node.ctorName, child._node.constructor.name);
+        if(child._node.ctorName === "_iter"
+        && !(child._node.children.length > 0
+          && child._node.children[0].constructor.name === "TerminalNode")){
             let nodes = [];
             child.children.forEach(()=> nodes.push(DOMChildren.shift()));
 
-            child.mapDOM(nodes);
+            child.mapDOM(nodes, this.args.domToOhm, this.args.ohmToDom);
             i += child.children.length === 0? 0: child.children.length - 1;
           } else if(child._node.constructor.name !== "TerminalNode"
-                    && child._node.ctorName !== "_iter"){
-            child.mapDOM(DOMChildren.shift());
+          && child._node.ctorName !== "_iter"){
+            child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);
           }
         }
       },
@@ -60,14 +51,20 @@ function reify(grammar, example){
           return;
         }
 
-        children.forEach((child, i)=> child.mapDOM(DOMNodes[i]));
+        children.forEach((child, i)=> child.mapDOM(DOMNodes[i], this.args.domToOhm, this.args.ohmToDom));
       }
     });
-  }
+}
 
-  let semmatch = semantics(grammar.match(example));
+function reify(semantics, match){
+  let tagPositions = {};
+  let domToOhm = new Map(),
+      ohmToDom = new Map();
+  let example = match._cst.interval.contents;
 
-  semmatch.reifyAST();
+  let semmatch = semantics(match);
+
+  semmatch.reifyAST(tagPositions);
 
   tagPositions = mapObject(tagPositions, function(tags){
     return tags.join("");
@@ -104,15 +101,19 @@ function reify(grammar, example){
   let DOM = parser.parseFromString(annotatedExample, "text/html");
   DOM = DOM.querySelector('body').children[0];
 
-  semmatch.mapDOM(DOM);
+  semmatch.mapDOM(DOM, domToOhm, ohmToDom);
 
   return [DOM, domToOhm, ohmToDom];
 }
 
 if(typeof module !== "undefined" && typeof module.exports !== "undefined"){
-  module.exports = reify;
+  module.exports = {
+    reify,
+    registerReifyActions
+  };
 } else {
   window.reify = reify;
+  window.registerReifyActions = registerReifyActions;
 }
 
 
