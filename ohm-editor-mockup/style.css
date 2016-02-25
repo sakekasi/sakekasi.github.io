@@ -50,15 +50,13 @@ columns {
 column {
   display: block;
   height: 100%;
-  min-width: 400px;
+  min-width: 600px;
   padding-left: 0px;
   padding-top: 20px;
-
   transition: filter 0.5s ease;
   -o-transition: -o-filter 0.5s ease;
   -moz-transition: filter 0.5s ease;
   -webkit-transition: -webkit-filter 0.5s ease;
-
   filter: saturate(50%);
   -o-filter: saturate(50%);
   -moz-filter: saturate(50%);
@@ -82,6 +80,12 @@ examples, relevantexamples, generatedexamples {
   display: flex;
   flex-direction: column;
   width: 100%;
+}
+
+rule > ruledefinebody > alt > choice,
+rule {
+  transition: background-color 0.05s, transform 0.05s;
+  transition-timing-function: linear;
 }
 
 rule choice:hover,
@@ -270,7 +274,7 @@ choice {
 ruleDefineBody > alt > choice > *,
 ruleOverrideBody > alt > choice > *,
 ruleExtendBody > alt > choice > * {
-  display: table-cell;
+  display: inline-block;
 }
 
 description {

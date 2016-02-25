@@ -1,21 +1,23 @@
 "use strict";
 
-var esprima = require("esprima"),
-    traverse = require("ast-traverse"),
-    $ = require("jquery"),
+var util = require("./util.js"),
+    reifyES = require("./reifyES.js");
+var $ = require("jquery"),
     chroma = require("chroma-js");
 
+var compare = util.compare,
+    reifyES = reifyES.reifyES;
 
 var identColor = "hsla(58, 100%, 80%, 1)"
 
 var focusedItems = null;
 
+var _ = function(x){ return Array.prototype.slice.call(x)};
+
 $(document).ready(function(){
 
-
-  $('action').each(function(){
-    var reified = reifyAST($(this).text());
-    $(this).html(reified);
+  _(document.querySelectorAll('action')).forEach((action)=>{
+    action.innerHTML = reifyES(action.textContent);
   });
 
   var scale = chroma.scale(
@@ -23,13 +25,13 @@ $(document).ready(function(){
   ).domain([0,5])
   .mode('lch');
 
-  $('rule').each(function(i){
-    $(this).find('choice').each(function(i){
-      var color = scale(i%5);
-      $(this).css("background-color", color.css('hsl'));
-      getAction($(this)).css("background-color", color.css('hsl'));
+  _(document.querySelectorAll('rule')).forEach((rule)=>{
+    _(rule.querySelectorAll('rule > ruledefinebody > alt > choice')).forEach((choice, i)=>{
+      let color = scale(i%5);
+      $(choice).css("background-color", color.css('hsl'));
+      getAction($(choice)).css("background-color", color.css('hsl'));
     });
-  })
+  });
 
   parallelHighlight('rule choice',
     function(ruleChoice){ return ruleChoice.parent(); }, "parentHover",
@@ -38,9 +40,9 @@ $(document).ready(function(){
 
   $('rule choice').mouseover(function(){
     var action = getAction($(this));
-    moveToIdealNonOverlapping($('action'), action.get()[0]);//, 100);
+    moveToIdealNonOverlapping($('action'), action.get()[0]);
   }).mouseout(function(){
-    moveToIdealNonOverlapping($('action'), null);//, 100);
+    moveToIdealNonOverlapping($('action'), null);
   }).click(function(){
     flipFocusedItems(
       this,
@@ -53,11 +55,7 @@ $(document).ready(function(){
     function(ruleDesc){ return ruleDesc.parent().find("choice"); }, "hover",
     function(ruleDesc){ return getActionsForRule(ruleDesc.parent()); }, "hover"
   );
-  $('rule > name, rule > description').mouseover(function(){
-    // moveToIdealNonOverlapping($('action'), null, 100);
-  }).mouseout(function(){
-    // moveToIdealNonOverlapping($('action'), null, 100);
-  }).click(function(){
+  $('rule > name, rule > description').click(function(){
     let rule = $(this).parent();
     flipFocusedItems(
       this,
@@ -75,11 +73,7 @@ $(document).ready(function(){
         getAlts(action);
     }, "hover"
   );
-  $('action').mouseover(function(){
-    // moveToIdealNonOverlapping($('action'), null, 100);
-  }).mouseout(function(){
-    // moveToIdealNonOverlapping($('action'), null, 100);
-  }).click(function(){
+  $('action').click(function(){
     flipFocusedItems(
       this,
       getAlts($(this)).get()[0]
@@ -103,14 +97,11 @@ function parallelHighlight(selector /*, accessor, color, ... */){
   }
 
   $(selector).mouseover(function(){
-    // console.log(selector, "mouseover");
-
     $(this).addClass("hover");//css("background-color", highlightedColor);
     parallelElements($(this)).forEach(function(element, i){
       element.addClass(classes[i]);
     });
   }).mouseout(function(){
-    // console.log(selector, "mouseout");
     if(!isFocused(this)){
       $(this).removeClass("hover");
       parallelElements($(this)).forEach(function(element, i){
@@ -190,11 +181,17 @@ function getActionsForRule(rule){
 //LAYOUT HELPERS
 ///////////////////
 function idealPosition(action){
-  var alts = getAlts(action);
+  let alts = getAlts(action);
 
-  var idealPos = alts.length > 0?
-    alts.offset().top:
-    getRule(action).children('name').offset().top;
+  let idealPos;
+
+  if(alts.length > 0){
+    idealPos = alts.offset().top;
+  } else if(getRule(action).children('name').length > 0){
+    idealPos = getRule(action).children('name').offset().top;
+  } else {
+    idealPos = action.offset().top;
+  }
 
   return idealPos;
 }
@@ -326,143 +323,4 @@ function moveToIdealNonOverlapping(actions, preferredItem, transition){
   sortedActions.each(function(i){
     moveElementToY($(this), positions[i], transition);
   });
-}
-
-//GENERIC HELPERS
-////////////////////
-function compare(a, b){
-  if(a > b){
-    return 1;
-  } else if(a < b){
-    return -1;
-  } else {
-    return 0;
-  }
-}
-
-function getWithInit(object, key, defaultValue){
-  if(!object.hasOwnProperty(key)){
-    object[key] = defaultValue;
-  }
-
-  return object[key];
-}
-
-function mapObject(object, fun){
-  var out = {};
-  Object.keys(object).forEach(function(key){
-    out[key] = fun(object[key]);
-  });
-
-  return out;
-}
-
-function mergeObjects(a, b, fun){
-  var out = {};
-  Object.keys(a).forEach(function(key){
-    if(b.hasOwnProperty(key)){
-      out[key] = fun(a[key], b[key]);
-    } else {
-      out[key] = a[key];
-    }
-  });
-
-  return Object.assign({}, b, out); //if conflict between b and out, prefer out.
-}
-
-function reifyAST(jsProgram){
-  var AST = esprima.parse(jsProgram, {range: true, tokens: true, tolerant: true});
-  var tokens = AST.tokens;
-  delete AST.tokens;
-  var tagPositions = {};
-
-  traverse(AST, {
-    pre: function(node){
-      var start = node.range[0];
-      var tagName = node.type;
-
-      if(tagName){
-        getWithInit(tagPositions, start, []).push(`<${tagName}>`);
-      }
-    }
-  }
-
-  // tokens get first priority
-  tokens.forEach(function(token){
-    var start = token.range[0],
-        end = token.range[1];
-
-    var tagName = token.type;
-
-    if(tagName){
-      getWithInit(tagPositions, start, []).push(`<${tagName}>`);
-      getWithInit(tagPositions, end, []).push(`</${tagName}>`);
-    }
-  });
-
-  traverse(AST, {
-    post: function(node){
-      var end = node.range[1];
-      var tagName = node.type;
-
-      if(tagName){
-        getWithInit(tagPositions, end, []).push(`</${tagName}>`);
-      }
-    }
-  });
-
-
-  tagPositions = mapObject(closeTagPositions, function(tags){
-    return tags.join("");
-  });
-
-  // //TODO: this may be incorrect
-  // var stringsToInsert = mergeObjects(openTagPositions, closeTagPositions, function(openStr, closeStr){
-  //   return closeStr + openStr;
-  // });
-
-  var positionsToInsert = Object.keys(tagPositions);
-  var stringsToInsert = Object.keys(tagPositions).map((key)=>tagPositions[key]);
-
-  var start = 0,
-      end;
-  var splitProgramString = [];
-  while(positionsToInsert.length > 0){
-    end = positionsToInsert.shift();
-    splitProgramString.push(
-      jsProgram.substring(start, end)
-    );
-
-    start = end;
-  }
-  splitProgramString.push(
-    jsProgram.substring(start)
-  );
-
-  var annotatedProgramPieces = [];
-  annotatedProgramPieces.push(splitProgramString.shift());
-  while(stringsToInsert.length > 0){
-    annotatedProgramPieces.push(stringsToInsert.shift());
-    annotatedProgramPieces.push(splitProgramString.shift());
-  }
-  annotatedProgramPieces.push(splitProgramString.shift());
-
-  return annotatedProgramPieces.join("");
-}
-
-function linearHL(colorRange, domainRange){
-  let colorStart = colorRange[0],
-      colorEnd = colorRange[1];
-  let domainStart = domainRange[0],
-      domainEnd = domainRange[1];
-
-  return function(input){
-    let scaled = (input - domainStart)/(domainEnd - domainStart);
-
-    let h = colorStart.get("hcl.h")+ (scaled * (colorEnd.get("hcl.h")-colorStart.get("hcl.h")));
-    let c = colorStart.get("hcl.c")+ (scaled * (colorEnd.get("hcl.c")-colorStart.get("hcl.c")));
-    let l = colorStart.get("hcl.l")+ (scaled * (colorEnd.get("hcl.l")-colorStart.get("hcl.l")));
-
-    return chroma.hcl(h, c, l);
-  }
 }
