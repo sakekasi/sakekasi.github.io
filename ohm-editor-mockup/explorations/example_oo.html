@@ -141,17 +141,24 @@ column {
   padding-left: 10px;
 }
 
+svg {
+  width: 100px;
+  /*height: 100%;*/
+}
+
 .current.leaf {
-  border: none;
+  background: hsla(0, 0%, 0%, 0);
+}
+
+.current{
+  background: hsla(0, 0%, 0%, 0.05);
 }
 
 .current {
-  border: 1px solid black;
-
-  transition: filter 0.5s ease;
-  -o-transition: -o-filter 0.5s ease;
-  -moz-transition: filter 0.5s ease;
-  -webkit-transition: -webkit-filter 0.5s ease;
+  transition: filter 0.2s ease;
+  -o-transition: -o-filter 0.2s ease;
+  -moz-transition: filter 0.2s ease;
+  -webkit-transition: -webkit-filter 0.2s ease;
 
   filter: saturate(40%);
   -o-filter: saturate(40%);
@@ -159,13 +166,25 @@ column {
   -webkit-filter: saturate(40%);
 }
 
-.current:hover {
-  filter: saturate(100%);
-  -o-filter: saturate(100%);
-  -moz-filter: saturate(100%);
-  -webkit-filter: saturate(100%);
+.current:hover,
+.active {
+  filter: saturate(150%);
+  -o-filter: saturate(150%);
+  -moz-filter: saturate(150%);
+  -webkit-filter: saturate(150%);
 }
 
+circle {
+  transition: filter 0.2s ease;
+  -o-transition: -o-filter 0.2s ease;
+  -moz-transition: filter 0.2s ease;
+  -webkit-transition: -webkit-filter 0.2s ease;
+
+  filter: inherit;
+  -o-filter: inherit;
+  -moz-filter: inherit;
+  -webkit-filter: inherit;
+}
 
 
 .current[result="success"]{
@@ -174,6 +193,11 @@ column {
 
 .current[result="error"]{
   color: red;
+}
+
+div#visualization {
+  display: flex;
+  flex-direction: row;
 }
 </style>
 </head>
@@ -309,33 +333,36 @@ column {
 </column>
 
 <column>
-<pre id="example">
-class Point with x, y;
+<div id="visualization">
+  <pre id="example">
+    class Point with x, y;
 
-def Point.init(x, y) {
-  this.x = x;
-  this.y = y;
-}
+    def Point.init(x, y) {
+      this.x = x;
+      this.y = y;
+    }
 
-def Point.toString() {
-  return "Point(" + this.x + ", " + this.y + ")";
-}
+    def Point.toString() {
+      return "Point(" + this.x + ", " + this.y + ")";
+    }
 
 
-class ThreeDeePoint extends Point with z;
+    class ThreeDeePoint extends Point with z;
 
-def ThreeDeePoint.init(x, y, z) {
-  super.init(x, y);
-  this.z = z;
-}
+    def ThreeDeePoint.init(x, y, z) {
+      super.init(x, y);
+      this.z = z;
+    }
 
-def ThreeDeePoint.toString() {
-  return "ThreeDeePoint(" +
+    def ThreeDeePoint.toString() {
+      return "ThreeDeePoint(" +
       this.x + ", " +
       this.y + ", " +
       this.z + ")";
-}
-</pre>
+    }
+  </pre>
+  <svg id="tree"></svg>
+</div>
 </column>
 </columns>
 
@@ -344,6 +371,9 @@ def ThreeDeePoint.toString() {
 <script src="mapSemantics.js"></script>
 <script src="classes.js"></script>
 <script src="toAST.js"></script>
+<script src="d3.min.js"></script>
+<script src="tree_visualization.js"></script>
+<script src="simplifyCST.js"></script>
 <script>
 'use strict';
 
@@ -355,6 +385,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   registerReifyActions(semantics);
   registerToAST(semantics);
   registerMapSemantics(grammar, semantics);
+  registerSimplifyAction(semantics);
 
   let exampleNode = document.querySelector('pre#example');
   let example = exampleNode.textContent;
@@ -371,29 +402,54 @@ document.addEventListener("DOMContentLoaded", function(event) {
   window.DOM2OHM = domToOhm;
   window.OHM2DOM = ohmToDom;
 
+  let nodeToSimplified = new Map();
+  let semmatch = semantics(match);
+  let simplifiedCST = semmatch.simplifyCST(null, nodeToSimplified);
+
   let nodeToResults = mapSemantics(semantics, "toAST", match);
 
   for(let key of nodeToResults.keys()){
-    let domNode = ohmToDom.get(key);
-    let result = nodeToResults.get(key);
+    if(! (key.constructor.name === "TerminalNode")){
+      let domNode = ohmToDom.get(key);
+      let result = nodeToResults.get(key);
 
-    domNode.setAttribute("result", result instanceof Error? "error": "success");
+      key.result = result;
+      domNode.setAttribute("result", result instanceof Error? "error": "success");
+    }
   }
 
-  DOM.classList.add("current");
 
+  DOM.classList.add("current");
+  nodeToSimplified.get(domToOhm.get(DOM)).current = true;
+
+  //TODO: rework TreeViz to use simplifiedCST
+  let treeVisualization = new TreeViz(
+    document.querySelector("svg"),
+    simplifiedCST,
+    ohmToDom
+  );
+
+  //DONE:TODO: rework this to step through simplified tree
   Array.prototype.slice.call(document.querySelectorAll(".current")).forEach(function(node){
     let listener = (currentNode, event)=>{
+      let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
+
       currentNode.removeEventListener("click", memobind1(listener, currentNode));
       if(currentNode.children.length > 0){
         currentNode.classList.remove("current");
-        Array.prototype.slice.call(currentNode.children).forEach((child)=>{
-          child.addEventListener("click", memobind1(listener, child));
-          child.classList.add("current");
+        currentSimplified.current = false;
+
+        Array.prototype.slice.call(nodeToSimplified.get(domToOhm.get(currentNode))._children).forEach((child)=>{
+          let domChild = ohmToDom.get(child.cstNodes.slice(-1)[0]);
+
+          domChild.addEventListener("click", memobind1(listener, domChild));
+          domChild.classList.add("current");
+          child.current = true;
         });
       } else {
         currentNode.classList.add("leaf");
       }
+      treeVisualization.split(currentSimplified);
     };
     node.addEventListener("click", memobind1(listener, node));
   });
@@ -412,6 +468,7 @@ function memobind1(fn, arg){
     memo.get(fn).set(arg, bound);
     return bound;
   }
+
 }
 
 </script>
