@@ -1,6 +1,7 @@
 <html>
 <head>
-  <link rel="stylesheet" type="text/css" href="../style.css">
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <link rel="stylesheet" type="text/css" href="../css/example.css">
   <script type="text/ohm-js">
 
   O {
@@ -304,13 +305,44 @@ return chars.join('');
 </column>
 
 <column id="examples">
- <input id="exampleInput" type="text" placeholder="type an example"/>
- <examples></examples>
+  <example>
+  <pre id="example">
+class Point with x, y;
+
+def Point.init(x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+def Point.toString() {
+  return "Point(" + this.x + ", " + this.y + ")";
+}
+
+
+class ThreeDeePoint extends Point with z;
+
+def ThreeDeePoint.init(x, y, z) {
+  super.init(x, y);
+  this.z = z;
+}
+
+def ThreeDeePoint.toString() {
+  return "ThreeDeePoint(" +
+  this.x + ", " +
+  this.y + ", " +
+  this.z + ")";
+}
+  </pre>
+  <svg id="tree"></svg>
+  </example>
 </column>
 
 </columns>
 
-<script src="../bundle.js"></script>
+<script src="../lib/ohm.js"></script>
+<script src="../lib/d3.min.js"></script>
+<script src="../dist/commons.js"></script>
+<script src="../dist/oo.bundle.js"></script>
 
 </body>
 </html>

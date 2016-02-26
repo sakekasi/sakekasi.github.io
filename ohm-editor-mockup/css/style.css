@@ -1,0 +1,195 @@
+@import url("../fonts/fonts.css");
+@import url("./grammar.css");
+
+body{
+  width: 500px;
+  font-family: "aleo", serif;
+  line-height: 1.3;
+  font-kerning: normal;
+  font-size: 15px;
+}
+
+input {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+
+  outline: none;
+  box-shadow: none;
+
+  border: none;
+
+  border-bottom: 1px solid black;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 10px;
+}
+
+grammar > name, semantics > name {
+  font-size: 18px;
+  font-style: italic;
+  font-weight: bold;
+}
+
+comment {
+  padding: 20px;
+  display: block;
+  font-family: "aleo light", serif;
+  font-style: italic;
+  font-size: 12px;
+  width: calc(100% - 40);
+  word-wrap: break-word;
+}
+
+columns {
+  display: flex;
+  flex-direction:row;
+  width: 700px;
+}
+
+column {
+  display: block;
+  height: 100%;
+  min-width: 600px;
+  padding-left: 0px;
+  padding-top: 20px;
+  transition: filter 0.5s ease;
+  -o-transition: -o-filter 0.5s ease;
+  -moz-transition: filter 0.5s ease;
+  -webkit-transition: -webkit-filter 0.5s ease;
+  filter: saturate(50%);
+  -o-filter: saturate(50%);
+  -moz-filter: saturate(50%);
+  -webkit-filter: saturate(50%);
+}
+
+column:hover {
+    filter: saturate(100%);
+    -o-filter: saturate(100%);
+    -moz-filter: saturate(100%);
+    -webkit-filter: saturate(100%);
+}
+
+column#examples {
+  display: block;
+  flex-direction: column;
+  padding-right: 15px;
+}
+
+examples, relevantexamples, generatedexamples {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+rule > ruledefinebody > alt > choice,
+rule {
+  transition: background-color 0.05s, transform 0.05s;
+  transition-timing-function: linear;
+}
+
+rule choice:hover,
+rule choice.hover,
+rule.hover,
+rule.hover.parentHover {
+  background-color: hsla(49,80%,92%,1) !important;
+}
+
+rule.parentHover {
+  background-color: hsl(0, 0%, 97%) !important;
+}
+
+action:hover,
+action.hover {
+  background-color: hsla(49,80%,92%,1) !important;
+  transform: scale(1.0);
+  -webkit-transform: scale(1.0);
+  -o-transform: scale(1.0);
+  -moz-transform: scale(1.0);
+  z-index: 1;
+  opacity: 0.9;
+}
+
+action {
+  transform-origin: 0 0;
+  transform: scale(0.8);
+  -webkit-transform: scale(0.8);
+  -o-transform: scale(0.8);
+  -moz-transform: scale(0.8);
+  z-index: 0;
+}
+
+action {
+  font-size: 13px;
+  font-family: "input serif compressed", monospace;
+  display: block;
+  white-space: pre;
+  position: relative;
+  top: 0;
+  transition: top 0.1s, background-color 0.1s, transform 0.1s;
+  transition-timing-function: ease;
+  /*transition: transform 0.2s ease;
+  transition: top 0.2s ease;*/
+  padding-left:  10px;
+  padding-top: 5px;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  width: inherit;
+}
+
+action.last {
+  margin-bottom: 10px;
+}
+
+action op {
+  color: hsl(219, 25%, 55%);
+  font-weight: normal;
+}
+
+action e {
+  color: hsla(243, 64%, 70%, 1);
+}
+
+
+
+
+/*SEMANTICS STYLING*/
+semantics keyword,
+semantics punctuator,
+semantics string {
+  font-weight: bold;
+}
+
+semantics punctuator {
+  color: hsla(162, 0%, 66%, 1);
+}
+
+semantics keyword {
+  color: hsla(162, 0%, 33%, 1);
+}
+
+
+semantics {
+    width: initial;
+    display:  block;
+}
+
+
+column#semantics {
+    /* margin-right: -80px; */
+}
+
+input#exampleInput {
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    width: 100%;
+}
+
+h4 {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 17px;
+    margin-bottom: 5px;
+}

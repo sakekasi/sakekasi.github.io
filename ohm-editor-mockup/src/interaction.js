@@ -14,7 +14,7 @@ var focusedItems = null;
 
 var _ = function(x){ return Array.prototype.slice.call(x)};
 
-$(document).ready(function(){
+document.addEventListener("DOMContentLoaded", function(){
 
   _(document.querySelectorAll('action')).forEach((action)=>{
     action.innerHTML = reifyES(action.textContent);
@@ -37,7 +37,6 @@ $(document).ready(function(){
     function(ruleChoice){ return ruleChoice.parent(); }, "parentHover",
     function(ruleChoice){ return getAction(ruleChoice); }, "hover"
   );
-
   $('rule choice').mouseover(function(){
     var action = getAction($(this));
     moveToIdealNonOverlapping($('action'), action.get()[0]);
@@ -130,6 +129,7 @@ function flipFocusedItems(...nodes){
 }
 
 var isFocused = (item)=> focusedItems && focusedItems.indexOf(item) !== -1;
+
 //ACCESSORS
 /////////////
 function getRule(action){
