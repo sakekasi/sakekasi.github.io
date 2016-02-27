@@ -306,6 +306,16 @@ return chars.join('');
 
 <column id="examples">
   <example>
+  <!-- <pre id="example">
+def Number.factorial() {
+  (this < 2) then: {
+    return this;
+  } else: {
+    return this * (this-1).fibonacci();
+  }
+}
+
+5.fibonacci();  </pre> -->
   <pre id="example">
 class Point with x, y;
 
@@ -332,6 +342,8 @@ def ThreeDeePoint.toString() {
   this.y + ", " +
   this.z + ")";
 }
+
+new Point(1, 2);
   </pre>
   <svg id="tree"></svg>
   </example>

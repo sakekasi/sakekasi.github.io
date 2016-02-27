@@ -7,11 +7,13 @@ var reify = require("./reify.js"),
     simplifyCST = require("./simplifyCST.js"),
     language = require ("../language.js"),
     TreeViz = require("./tree_visualization.js").TreeViz,
+    treeUtils = require("./treeUtils.js"),
 
     toAST = require("../oo/toAST.js"); //TODO: make this language agnostic
 
-// var grammar = language.grammar,
-//     semantics = language.semantics;
+var _ = function(x){ return Array.prototype.slice.call(x)};
+
+var domToOhm, ohmToDom, nodeToSimplified, nodeToResults, treeVisualization;
 
 document.addEventListener("DOMContentLoaded", function(event) {
   let grammar = language.grammar,
@@ -27,22 +29,29 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //get semantics match
   let exampleNode = document.querySelector('pre#example');
   let example = exampleNode.textContent;
-  let match = grammar.match(example);
-  let semmatch = semantics(match);
+  let match;
+  let semmatch;
+  try {
+    match = grammar.match(example);
+    semmatch = semantics(match);
+  } catch (e) {
+    console.error(match.message);
+  }
+
 
   //reify the CST to DOM
   let reified = reify.reify(semantics, match);
-  let DOM = reified[0],
-      domToOhm = reified[1],
-      ohmToDom = reified[2];
+  let DOM = reified[0];
+  domToOhm = reified[1];
+  ohmToDom = reified[2];
 
   exampleNode.textContent = "";
   exampleNode.appendChild(DOM);
 
   //generate simplified CST
-  let nodeToSimplified = new Map();
+  nodeToSimplified = new Map();
   let simplifiedCST = semmatch.simplifyCST(null, nodeToSimplified);
-  let nodeToResults = mapSemantics.mapSemantics(semantics, "toAST", match);
+  nodeToResults = mapSemantics.mapSemantics(semantics, "toAST", match);
 
   for(let key of nodeToResults.keys()){
     if(! (key.constructor.name === "TerminalNode")){
@@ -50,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       let result = nodeToResults.get(key);
 
       key.result = result;
+      ohmToDom.get(nodeToSimplified.get(key).cstNodes[0]).setAttribute("possibleCurrent", "true");
       domNode.setAttribute("result", result instanceof Error? "error": "success");
     }
   }
@@ -58,51 +68,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
   DOM.classList.add("current");
   nodeToSimplified.get(domToOhm.get(DOM)).current = true;
 
-  let treeVisualization = new TreeViz(
+  treeVisualization = new TreeViz(
     document.querySelector("svg"),
     simplifiedCST,
-    ohmToDom
+    ohmToDom,
+    {
+      splitNode,
+      joinNode,
+      highlightNode,
+      unHighlightNode
+    }
   );
 
-  let highlightTreeNode = function(node){
-    treeVisualization.highlight(nodeToSimplified.get(domToOhm.get(node)));
-  };
-  let unHighlightTreeNode = function(node){
-    treeVisualization.unHighlight(nodeToSimplified.get(domToOhm.get(node)));
-  };
+  DOM.addEventListener("click", memobind1(onClick, DOM));
+  DOM.addEventListener("mouseover", memobind1(onMouseover, DOM));
+  DOM.addEventListener("mouseout", memobind1(onMouseout, DOM));
 
-  Array.prototype.slice.call(document.querySelectorAll(".current")).forEach(function(node){
-    let breakApart = (currentNode, event)=>{
-      let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
-
-      currentNode.removeEventListener("click", memobind1(breakApart, currentNode));
-      currentNode.removeEventListener("mouseover", memobind1(highlightTreeNode, currentNode));
-      currentNode.removeEventListener("mouseout", memobind1(unHighlightTreeNode, currentNode));
-
-      if(currentNode.children.length > 0){
-        currentNode.classList.remove("current");
-        currentSimplified.current = false;
-        unHighlightTreeNode(currentNode);
-
-        Array.prototype.slice.call(nodeToSimplified.get(domToOhm.get(currentNode))._children).forEach((child)=>{
-          let domChild = ohmToDom.get(child.cstNodes.slice(-1)[0]);
-
-          domChild.addEventListener("click", memobind1(breakApart, domChild));
-          domChild.addEventListener("mouseover", memobind1(highlightTreeNode, domChild));
-          domChild.addEventListener("mouseout", memobind1(unHighlightTreeNode, domChild));
-
-          domChild.classList.add("current");
-          child.current = true;
-        });
-      } else {
-        currentNode.classList.add("leaf");
-      }
-      treeVisualization.split(currentSimplified);
-    };
-    node.addEventListener("click", memobind1(breakApart, node));
-    node.addEventListener("mouseover", memobind1(highlightTreeNode, node));
-    node.addEventListener("mouseout", memobind1(unHighlightTreeNode, node));
-  });
 
 });
 
@@ -119,4 +100,99 @@ function memobind1(fn, arg){
     memo.get(fn).set(arg, bound);
     return bound;
   }
+}
+
+//EVENT LISTENERS
+function onClick(currentNode, event){
+  let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
+  if(event.altKey){
+    currentSimplified = currentSimplified.parent || currentSimplified;
+    joinNode(currentSimplified);
+  } else {
+    splitNode(currentSimplified);
+  }
+  event.stopPropagation();
+}
+
+function onMouseover(currentNode, event){
+  let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
+  highlightNode(currentSimplified);
+}
+
+function onMouseout(currentNode, event){
+  let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
+  unHighlightNode(currentSimplified);
+}
+
+function makeCurrent(simplifiedCSTNode){
+  let domNode = ohmToDom.get(simplifiedCSTNode.cstNodes[0]);
+  domNode.classList.add("current");
+
+  domNode.addEventListener("click", memobind1(onClick, domNode));
+  domNode.addEventListener("mouseover", memobind1(onMouseover, domNode));
+  domNode.addEventListener("mouseout", memobind1(onMouseout, domNode));
+}
+
+function makeNonCurrent(simplifiedCSTNode){
+  let domNode = ohmToDom.get(simplifiedCSTNode.cstNodes[0]);
+  domNode.classList.remove("current");
+
+  domNode.removeEventListener("click", memobind1(onClick, domNode));
+  domNode.removeEventListener("mouseover", memobind1(onMouseover, domNode));
+  domNode.removeEventListener("mouseout", memobind1(onMouseout, domNode));
+
+  onMouseout(domNode);
+}
+
+
+//VISUALIZATION OPERATIONS
+function splitNode(simplifiedCSTNode){
+  let children = simplifiedCSTNode._children? simplifiedCSTNode._children: simplifiedCSTNode.children;
+
+  if(children && children.length > 0){
+    //make cst node's children current
+    simplifiedCSTNode.current = false;
+    makeNonCurrent(simplifiedCSTNode);
+
+    //make corresponding dom node's children current
+    children.forEach(child=> child.current = true);
+    children.forEach(makeCurrent);
+
+    //split tree visualization
+    treeVisualization.split(simplifiedCSTNode);
+  }
+}
+
+function joinNode(simplifiedCSTNode){
+  let descendants = treeUtils.descendants(simplifiedCSTNode, (child)=>
+    child._children? child._children: child.children);
+
+  //remove cst node's children's noncurrent
+  descendants.forEach(child=> child.current = false);
+  descendants.forEach(makeNonCurrent);
+
+  //make corresponding dom node current
+  simplifiedCSTNode.current = true;
+  makeCurrent(simplifiedCSTNode);
+
+  //join tree visualization
+  treeVisualization.join(simplifiedCSTNode);
+}
+
+function highlightNode(simplifiedCSTNode){
+  //highlight corresponding dom node
+  let domNode = ohmToDom.get(simplifiedCSTNode.cstNodes[0]);
+  domNode.classList.add("active");
+
+  //highlight tree visualization
+  treeVisualization.highlight(simplifiedCSTNode);
+}
+
+function unHighlightNode(simplifiedCSTNode){
+  //unhighlight corresponding dom node
+  let domNode = ohmToDom.get(simplifiedCSTNode.cstNodes[0]);
+  domNode.classList.remove("active");
+
+  //unhighlight tree viz
+  treeVisualization.unHighlight(simplifiedCSTNode);
 }

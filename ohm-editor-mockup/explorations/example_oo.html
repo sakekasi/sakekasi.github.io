@@ -440,7 +440,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         currentSimplified.current = false;
 
         Array.prototype.slice.call(nodeToSimplified.get(domToOhm.get(currentNode))._children).forEach((child)=>{
-          let domChild = ohmToDom.get(child.cstNodes.slice(-1)[0]);
+          let domChild = ohmToDom.get(child.cstNodes[0]);
 
           domChild.addEventListener("click", memobind1(listener, domChild));
           domChild.classList.add("current");

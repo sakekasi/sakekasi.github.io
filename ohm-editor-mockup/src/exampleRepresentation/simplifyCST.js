@@ -25,6 +25,7 @@ function registerSimplifyAction(semantics){
           simplifiedNode = {
             ctorName: this._node.ctorName,
             cstNodes: [this._node],
+            parent: this.args.simplifiedParentNode,
             children: []
           };
 

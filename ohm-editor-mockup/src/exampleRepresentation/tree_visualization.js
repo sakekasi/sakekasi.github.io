@@ -1,11 +1,14 @@
 'use strict';
 
+var treeUtils = require("./treeUtils.js");
+
 var duration = 100;
 var curId = 0;
 
 class TreeViz{
-  constructor(svg, root, ohmToDom){
+  constructor(svg, root, ohmToDom, actions){
     this.ohmToDom = ohmToDom;
+    this.actions = actions;
 
     this.svg = d3.select(svg)
                .append("g")
@@ -17,19 +20,33 @@ class TreeViz{
 
     this.tree = d3.layout.tree()
       .children(function(n){
-        if(n.children){
+        if(n.children && !n.hasOwnProperty('_children')){
           n._children = n.children;
         }
 
         if(n._children
-           && n._children.length > 0
-           && n._children[0].current !== undefined){
-          return n.children? n.children: n.children = n._children;
+           && n._children.length > 0){
+          let descendants = treeUtils.descendants(n, function(child){
+            if(child.children && !child._children){
+              child._children = child.children;
+            }
+
+            return child._children;
+          });
+
+          if(descendants.reduce((a,b)=> b.current || a, false)){
+            return n._children;
+          }
         }
 
         return null;
       })
       .size([this.height, this.width]);
+
+    this.voronoi = d3.geom.voronoi()
+    	.x(function(d) { return d.y; })
+    	.y(function(d) { return d.x; })
+    	.clipExtent([[-10, -10], [this.width, this.height]]);
 
     this.root = root;
     this.root.x0 = this.height/2;
@@ -40,12 +57,6 @@ class TreeViz{
 
   update(parent){
     let nodes = this.tree.nodes(this.root);//.reverse();
-    let voronoi = d3.geom.voronoi()
-    	.x(function(d) { return d.x; })
-    	.y(function(d) { return d.y; })
-    	.clipExtent([[-10, -10], [this.width, this.height]]);
-
-
 
     let svgNode = this.svg.selectAll("g.node")
       .data(nodes, function(d){ //assign each object an id since d3 can't do object equality apparently :/
@@ -65,20 +76,24 @@ class TreeViz{
       .attr("r", 5);
 
     let treeviz = this;
-    // .on("mouseover", function(datum){
-    //   this.classList.add("active");
-    //   treeviz.ohmToDom.get(datum.cstNodes.slice(-1)[0]).classList.add("active");
-    // }).on("mouseout", function(datum){
-    //   this.classList.remove("active");
-    //   treeviz.ohmToDom.get(datum.cstNodes.slice(-1)[0]).classList.remove("active");
-    // })
     let svgNodeUpdate = svgNode
+      .on("mouseover", function(datum){
+        treeviz.actions.highlightNode(datum);
+      }, true)
+      .on("mouseout",  function(datum){
+        treeviz.actions.unHighlightNode(datum);
+      }, true)
+      .on("click", function(datum){
+        if(d3.event.altKey){
+          treeviz.actions.joinNode(datum);
+        } else if(datum.current){
+          treeviz.actions.splitNode(datum);
+        }
+      }, true)
     .transition().duration(duration)
       .attr("transform", (n)=> `translate(${n.y}, ${n.x})`)
       .style("fill", (n)=> {
-        // if(n.clicked){
-        //   return "gray";
-      /*} else */if( n.cstNodes.slice(-1)[0].result instanceof Error ){
+        if( n.cstNodes[0].result instanceof Error ){
           return  "red";
         } else {
           return "green";
@@ -90,30 +105,37 @@ class TreeViz{
       .attr("transform", (n)=> `translate(${parent.y0}, ${parent.x0})`)
       .remove();
 
-    console.log(voronoi(nodes));
-
     let polygon = function(d) {
       return "M" + d.join("L") + "Z";
     };
+
     //Create the Voronoi grid
-    this.svg.selectAll("path")
-      .data(voronoi(nodes), polygon)
-      .enter().append("path")
-      .attr("d", polygon)
+    let paths = this.svg.selectAll("path")
+      .data(this.voronoi(nodes));
+
+    paths.enter().append("path");
+    paths.exit().remove();
+
+    paths.attr("d", function(d, i) { return "M" + d.join("L") + "Z"; })
       .datum(function(d, i) { return d.point; })
-      //Give each cell a unique class where the unique part corresponds to the circle classes
+            //Give each cell a unique class where the unique part corresponds to the circle classes
       .attr("class", function(d,i) { return "voronoi " + d.CountryCode; })
-      //.style("stroke", "#2074A0") //If you want to look at the cells
+      // .style("stroke", "#2074A0") //If you want to look at the cells
       .style("fill", "none")
       .style("pointer-events", "all")
       .on("mouseover", function(datum){
-        this.classList.add("active");
-        treeviz.ohmToDom.get(datum.cstNodes.slice(-1)[0]).classList.add("active");
+        treeviz.actions.highlightNode(datum);
       })
       .on("mouseout",  function(datum){
-        this.classList.remove("active");
-        treeviz.ohmToDom.get(datum.cstNodes.slice(-1)[0]).classList.remove("active");
-      });
+        treeviz.actions.unHighlightNode(datum);
+      })
+      .on("click", function(datum){
+        if(d3.event.altKey){
+          treeviz.actions.joinNode(datum);
+        } else if(datum.current){
+          treeviz.actions.splitNode(datum);
+        }
+      }, true);
 
     nodes.forEach((n)=>{
       n.x0 = n.x;
@@ -122,7 +144,11 @@ class TreeViz{
   }
 
   split(node){
-    node.clicked = true;
+    // node.clicked = true;
+    this.update(node);
+  }
+
+  join(node){
     this.update(node);
   }
 

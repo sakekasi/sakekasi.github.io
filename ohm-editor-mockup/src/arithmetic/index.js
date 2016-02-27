@@ -1,3 +1,3 @@
 require('../interaction.js');
-// require('./exampledb.js');
-// require('./generators.js');
+require('../exampleGeneration/exampledb.js');
+require('../exampleGeneration/generators.js');

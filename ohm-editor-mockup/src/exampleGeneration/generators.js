@@ -2,7 +2,7 @@
 var EXAMPLES = require("./exampledb.js"),
     $ = require("jquery"),
     makeExample = require("./example.js"),
-    grammar = require('./language.js').grammar,
+    language = require('../language.js'),
     diversity_fns = require("./diversity.js");
 
 let diversity = diversity_fns.diversity;
@@ -389,7 +389,7 @@ function setGeneratedExamples(ruleName){
       let exampleCST;
       let match;
 
-      match = grammar.match(example, ruleName);
+      match = language.grammar.match(example, ruleName);
       exampleCST = match._cst;
       exampleCST.originalText = example;
 
@@ -425,26 +425,6 @@ function setGeneratedExamples(ruleName){
 
       numSeen++;
     }
-    //
-    // let i;
-    // for(i=0; i < 50; i++, generator.next()){}
-    // let examples = []
-    // for(i = 0; i < 10; i++){
-    //   examples.push(generator.next().value);
-    // }
-
-    // let exampleSet = new Set(examples.map(example =>{
-    //   try{
-    //     return grammar.match(example, ruleName)._cst;
-    //   } catch(e) {
-    //     return null;
-    //   }
-    // }).filter(item=>item));
-    //
-    // let e = entropy(exampleSet, "ctorName");
-    // let entropyNode = document.createElement("span");
-    // entropyNode.textContent = `ENTROPY: ${e}`;
-    // node.appendChild(entropyNode);
 
     diverseExamples
       .map(i=>i.originalText)
@@ -454,7 +434,7 @@ function setGeneratedExamples(ruleName){
   }
 }
 
-$(document).ready(function(){
+document.addEventListener("DOMContentLoaded", function(){
   setGeneratedExamples("Exp");
 
   document.querySelector("input#exampleInput").addEventListener("keyup", function(e){

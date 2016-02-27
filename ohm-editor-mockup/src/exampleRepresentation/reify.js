@@ -40,14 +40,12 @@ function registerReifyActions(semantics){
 
   semantics.addOperation("mapDOM(DOMNode, domToOhm, ohmToDom)", {
     _nonterminal(children){
-      console.log(this._node.ctorName);
       this.args.domToOhm.set(this.args.DOMNode, this._node);
       this.args.ohmToDom.set(this._node, this.args.DOMNode);
 
       let DOMChildren = Array.prototype.slice.apply(this.args.DOMNode.children);
       for(let i=0; i < children.length; i++){
         let child = children[i];
-        console.log(child._node.ctorName, child._node.constructor.name);
         if(child._node.ctorName === "_iter"
         && !(child._node.children.length > 0
           && child._node.children[0].constructor.name === "TerminalNode")){
@@ -55,7 +53,7 @@ function registerReifyActions(semantics){
             child.children.forEach(()=> nodes.push(DOMChildren.shift()));
 
             child.mapDOM(nodes, this.args.domToOhm, this.args.ohmToDom);
-            i += child.children.length === 0? 0: child.children.length - 1;
+            // i += child.children.length === 0? 0: child.children.length - 1;
           } else if(child._node.constructor.name !== "TerminalNode"
           && child._node.ctorName !== "_iter"){
             child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);

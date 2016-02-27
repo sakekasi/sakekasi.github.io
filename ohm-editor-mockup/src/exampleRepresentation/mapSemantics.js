@@ -21,7 +21,7 @@ function registerMapSemantics(grammar, semantics){
         let match = grammar.match(examplePiece, this._node.ctorName);
         result = semantics(match)[this.args.action]();
       } catch(e) {
-        console.error(e);
+        // console.error(e);
         result = e;//new Error(`${this._node.ctorName}: ${this.interval.contents}`);
       }
 

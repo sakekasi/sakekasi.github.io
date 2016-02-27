@@ -5,6 +5,8 @@ example {
 
 pre#example{
   line-height: 1.1;
+  flex: 1;
+  font-family: "input serif compressed", monospace;
 }
 
 pre#example * {
@@ -12,7 +14,8 @@ pre#example * {
 }
 
 svg {
-  width: 100px;
+  flex: 1;
+  width: 200px;
   /*height: 100%;*/
 }
 
@@ -25,10 +28,10 @@ svg {
 }
 
 .current {
-  transition: filter 0.2s, font-size 0.2s;
-  -o-transition: -o-filter 0.2s, font-size 0.2s;
-  -moz-transition: filter 0.2s, font-size 0.2s;
-  -webkit-transition: -webkit-filter 0.2s, font-size 0.2s;
+  transition: filter 0.2s, background-color 0.2s;
+  -o-transition: -o-filter 0.2s, background-color 0.2s;
+  -moz-transition: filter 0.2s, background-color 0.2s;
+  -webkit-transition: -webkit-filter 0.2s, background-color 0.2s;
 
   transition-timing-function: ease;
   -o-transition-timing-function: ease;
@@ -45,18 +48,23 @@ svg {
   z-index: 0;
 }
 
+
 .current:hover,
-.active {
+.current.active,
+.active .current {
   filter: saturate(150%);
   -o-filter: saturate(150%);
   -moz-filter: saturate(150%);
   -webkit-filter: saturate(150%);
-
-  font-size: 16px;
-
+  font-size: 15px;
+  background-color: hsla(0, 0%, 0%, 0.07);
   z-index: 1;
   opacity: 0.9;
+  /* border-radius: 10px; */
+  background-size: cover;
 }
+
+stmt.current {}
 
 circle {
   transition: filter 0.2s ease;
@@ -79,7 +87,22 @@ circle {
   color: red;
 }
 
+pre *.active[result="success"] * {
+  color: green !important;
+}
+
+pre *.active[result="error"] * {
+  color: red !important;
+}
+
 div#visualization {
   display: flex;
   flex-direction: row;
+}
+
+
+.current:hover *[possiblecurrent="true"],
+.current.active *[possiblecurrent="true"],
+.active .current *[possiblecurrent="true"] {
+    background-color: hsla(0, 0%, 0%, 0.02);
 }

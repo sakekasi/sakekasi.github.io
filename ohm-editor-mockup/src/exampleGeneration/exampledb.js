@@ -1,37 +1,25 @@
 'use strict';
 
 var $ = require("jquery"),
-    language = require("./language.js"),
-    makeExample = require("./example.js");
-
-var g = language.grammar;
-var s = language.semantics;
+    language = require("../language.js"),
+    makeExample = require("./example.js"),
+    registerInterpret = require("../arithmetic/interpret.js").registerInterpret;
 
 var examples = {};
 
-s.addOperation("addExamples", {
-  _nonterminal(children){
-    getWithInit(examples, this._node.ctorName, new Set()).add(
-      this.interval.contents
-    );
+if(typeof module !== "undefined" && typeof module.exports !== "undefined"){
+  module.exports = examples;
+} else {
+  window.EXAMPLES = examples;
+}
 
-    children.forEach((child)=>{
-      child.addExamples();
-    });
-  },
-  _terminal(){
-    getWithInit(examples, this._node.ctorName, new Set()).add(
-      this.interval.contents
-    );
-  }
-});
 
 var examplesSeen = new Set();
 
 function inferExamples(example){
   if(!examplesSeen.has(example)){
-    var match = g.match(example);
-    s(match).addExamples();
+    var match = language.grammar.match(example);
+    language.semantics(match).addExamples();
     examplesSeen.add(example);
   }
 }
@@ -51,7 +39,26 @@ function getWithInit(object, key, defaultValue){
   return object[key];
 }
 
-$(document).ready(function(){
+document.addEventListener("DOMContentLoaded", function(){
+   registerInterpret(language.semantics);
+
+   language.semantics.addOperation("addExamples", {
+    _nonterminal(children){
+      getWithInit(module.exports, this._node.ctorName, new Set()).add(
+        this.interval.contents
+      );
+
+      children.forEach((child)=>{
+        child.addExamples();
+      });
+    },
+    _terminal(){
+      getWithInit(module.exports, this._node.ctorName, new Set()).add(
+        this.interval.contents
+      );
+    }
+  });
+
   document.querySelector("input#exampleInput").addEventListener("keyup", function(e){
     if(e.code === "Enter"){
       var example = document.querySelector("#exampleInput").value;
@@ -129,10 +136,4 @@ function getExampleString(){
     },
     '  '
   );
-}
-
-if(typeof module !== "undefined" && typeof module.exports !== "undefined"){
-  module.exports = examples;
-} else {
-  window.EXAMPLES = examples;
 }

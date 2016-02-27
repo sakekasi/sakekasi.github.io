@@ -1,4 +1,4 @@
-var language = require('./language.js'),
+var language = require('../language.js'),
     chroma = require("chroma-js");
 
 
