@@ -105,7 +105,7 @@ function memobind1(fn, arg){
 //EVENT LISTENERS
 function onClick(currentNode, event){
   let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
-  if(event.altKey){
+  if(event.altKey || event.ctrlKey){
     currentSimplified = currentSimplified.parent || currentSimplified;
     joinNode(currentSimplified);
   } else {

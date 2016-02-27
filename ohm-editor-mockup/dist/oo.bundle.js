@@ -132,7 +132,7 @@ webpackJsonp([1],[
 	//EVENT LISTENERS
 	function onClick(currentNode, event){
 	  let currentSimplified = nodeToSimplified.get(domToOhm.get(currentNode));
-	  if(event.altKey){
+	  if(event.altKey || event.ctrlKey){
 	    currentSimplified = currentSimplified.parent || currentSimplified;
 	    joinNode(currentSimplified);
 	  } else {
@@ -564,7 +564,7 @@ webpackJsonp([1],[
 	        treeviz.actions.unHighlightNode(datum);
 	      }, true)
 	      .on("click", function(datum){
-	        if(d3.event.altKey){
+	        if(d3.event.altKey || d3.event.ctrlKey){
 	          treeviz.actions.joinNode(datum);
 	        } else if(datum.current){
 	          treeviz.actions.splitNode(datum);
@@ -610,7 +610,7 @@ webpackJsonp([1],[
 	        treeviz.actions.unHighlightNode(datum);
 	      })
 	      .on("click", function(datum){
-	        if(d3.event.altKey){
+	        if(d3.event.altKey || d3.event.ctrlKey){
 	          treeviz.actions.joinNode(datum);
 	        } else if(datum.current){
 	          treeviz.actions.splitNode(datum);

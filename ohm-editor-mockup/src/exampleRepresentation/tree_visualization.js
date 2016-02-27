@@ -84,7 +84,7 @@ class TreeViz{
         treeviz.actions.unHighlightNode(datum);
       }, true)
       .on("click", function(datum){
-        if(d3.event.altKey){
+        if(d3.event.altKey || d3.event.ctrlKey){
           treeviz.actions.joinNode(datum);
         } else if(datum.current){
           treeviz.actions.splitNode(datum);
@@ -130,7 +130,7 @@ class TreeViz{
         treeviz.actions.unHighlightNode(datum);
       })
       .on("click", function(datum){
-        if(d3.event.altKey){
+        if(d3.event.altKey || d3.event.ctrlKey){
           treeviz.actions.joinNode(datum);
         } else if(datum.current){
           treeviz.actions.splitNode(datum);
