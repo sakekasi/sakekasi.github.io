@@ -1,5 +1,7 @@
 'use strict';
 
+var textures = require("textures");
+
 var treeUtils = require("./treeUtils.js");
 
 var duration = 100;
@@ -10,13 +12,24 @@ class TreeViz{
     this.ohmToDom = ohmToDom;
     this.actions = actions;
 
-    this.svg = d3.select(svg)
-               .append("g")
-                 .attr("transform", "translate(10, 10)");
+    this.svg = d3.select(svg);
+
+    this.texture = textures.lines()
+                     .size(3)
+                     .strokeWidth(1)
+                     .stroke("hsla(0, 0%, 0%, 0.5)")
+                     .background("hsla(0, 0%, 0%, 0.2)");
+
+    this.svg.call(this.texture);
+
+
+    this.svg = this.svg.append("g")
+       .attr("transform", "translate(10, 10)");
+
 
     let boundingRect = svg.getBoundingClientRect();
-    this.width = boundingRect.width - 20;
-    this.height = boundingRect.height - 20;
+    this.width = boundingRect.width - 50;
+    this.height = boundingRect.height - 50;
 
     this.tree = d3.layout.tree()
       .children(function(n){
@@ -56,7 +69,7 @@ class TreeViz{
   }
 
   update(parent){
-    let nodes = this.tree.nodes(this.root).reverse(),
+    let nodes = this.tree.nodes(this.root),//.reverse(),
         links = this.tree.links(nodes);
 
     let svgNode = this.svg.selectAll("g.node")
@@ -75,7 +88,7 @@ class TreeViz{
       .attr("id", (d)=>d.id)
     .append("circle")
       .attr("r", (node)=>
-        node.landmark? 8: 5);
+        node.landmark? 3: 5);
 
     let treeviz = this;
     let svgNodeUpdate = svgNode
@@ -96,7 +109,9 @@ class TreeViz{
       .attr("transform", (n)=> `translate(${n.y}, ${n.x})`)
       .style("fill", (n)=> {
         if( n.landmark ){
-          return "gray";
+          return "hsla(0, 0%, 0%, 0.7)";
+          // console.log(this.texture.url());
+          return this.texture.url();
         } else if( n.cstNodes[0].result instanceof Error ){
           return  "red";
         } else {
@@ -163,7 +178,7 @@ class TreeViz{
 
   unHighlight(node){
     d3.select(`g.node[id="${node.id}"]`).selectAll("circle").transition().duration(duration)
-      .attr("r", 5);
+      .attr("r", node.landmark? 3 : 5);
   }
 }
 

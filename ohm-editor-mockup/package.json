@@ -15,7 +15,8 @@
     "ast-traverse": "^0.1.1",
     "chroma-js": "^1.1.1",
     "esprima": "^2.7.2",
-    "jquery": "^2.2.0"
+    "jquery": "^2.2.0",
+    "textures": "^1.0.3"
   },
   "devDependencies": {
     "webpack": "^1.12.14"

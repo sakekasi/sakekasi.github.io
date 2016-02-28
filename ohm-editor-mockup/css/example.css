@@ -9,22 +9,9 @@ pre#example{
   font-family: "input serif compressed", monospace;
 }
 
-pre#example * {
-  /*background-color: hsla(0, 0%, 0%, 0.005);*/
-}
-
 svg {
   flex: 1;
   width: 200px;
-  /*height: 100%;*/
-}
-
-.current.leaf {
-  /*background: hsla(0, 0%, 0%, 0);*/
-}
-
-.current{
-  /*background: hsla(0, 0%, 0%, 0.05);*/
 }
 
 .current {
@@ -131,5 +118,5 @@ column#examples {
 
 .landmark {
   font-weight: bold;
-  -webkit-filter: opacity(0.6);
+  -webkit-filter: opacity(0.7);
 }
