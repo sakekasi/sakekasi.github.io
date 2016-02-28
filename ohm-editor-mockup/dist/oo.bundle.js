@@ -80,14 +80,25 @@ webpackJsonp([1],[
 	  let simplifiedCST = semmatch.simplifyCST(null, nodeToSimplified);
 	  nodeToResults = mapSemantics.mapSemantics(semantics, "toAST", match);
 	
-	  for(let key of nodeToResults.keys()){
-	    if(! (key.constructor.name === "TerminalNode")){
-	      let domNode = ohmToDom.get(key);
-	      let result = nodeToResults.get(key);
+	  for(let key of ohmToDom.keys()){
+	    let domNode = ohmToDom.get(key);
+	    let simplifiedNode = nodeToSimplified.get(key);
 	
-	      key.result = result;
-	      ohmToDom.get(nodeToSimplified.get(key).cstNodes[0]).setAttribute("possibleCurrent", "true");
-	      domNode.setAttribute("result", result instanceof Error? "error": "success");
+	    if(! (key.constructor.name === "TerminalNode")){
+	      if(nodeToResults.has(key)){
+	        let result = nodeToResults.get(key);
+	
+	        ohmToDom.get(simplifiedNode.cstNodes[0]).setAttribute("possibleCurrent", "true");
+	
+	        key.result = result;
+	        domNode.setAttribute("result", result instanceof Error? "error": "success");
+	      }
+	    } else {
+	      let parent = domNode.parentNode;
+	      if( Array.prototype.slice.call(parent.children).find(child=> child.tagName.toLowerCase() !== "terminal")  ){
+	        domNode.classList.add("landmark");
+	        simplifiedNode.landmark = true;
+	      }
 	    }
 	  }
 	
@@ -260,11 +271,46 @@ webpackJsonp([1],[
 	  semantics.addOperation("reifyAST(tagPositions)", {
 	    _nonterminal(children){
 	      let start = this.interval.startIdx,
-	      end = this.interval.endIdx;
+	          end = this.interval.endIdx;
 	      let tagName = this._node.ctorName;
 	
 	      getWithInit(this.args.tagPositions, start, []).push(openTag(tagName));
-	      children.forEach(child=> child.reifyAST(this.args.tagPositions));
+	
+	      for(let i=0; i < children.length; i++){
+	        let child = children[i];
+	        if(child._node.ctorName === "_iter"){
+	          let iters = [child];
+	          while(children[i+1] && children[i+1]._node.ctorName === "_iter"){
+	            if(children[i+1].interval.contents === iters[0].interval.contents){
+	              iters.push(children[++i]);
+	            } else {
+	              break;
+	            }
+	          }
+	
+	          let iterChildren = iters.map((iter)=>Array.prototype.slice.call(iter.children));
+	          let interleavedChildren = [];
+	          while(iterChildren[0].length > 0){
+	            iterChildren.forEach((iterC)=>{
+	              interleavedChildren.push(iterC.shift());
+	            });
+	          }
+	
+	          interleavedChildren.forEach(child=> child.reifyAST(this.args.tagPositions));
+	        } else {
+	          child.reifyAST(this.args.tagPositions);
+	        }
+	      }
+	
+	      // children.forEach(child=> child.reifyAST(this.args.tagPositions));
+	      getWithInit(this.args.tagPositions, end, []).push(closeTag(tagName));
+	    },
+	    _terminal(){
+	      let start = this.interval.startIdx,
+	          end = this.interval.endIdx;
+	      let tagName = "terminal";
+	
+	      getWithInit(this.args.tagPositions, start, []).push(openTag(tagName));
 	      getWithInit(this.args.tagPositions, end, []).push(closeTag(tagName));
 	    }
 	  });
@@ -277,29 +323,47 @@ webpackJsonp([1],[
 	      let DOMChildren = Array.prototype.slice.apply(this.args.DOMNode.children);
 	      for(let i=0; i < children.length; i++){
 	        let child = children[i];
-	        if(child._node.ctorName === "_iter"
-	        && !(child._node.children.length > 0
-	          && child._node.children[0].constructor.name === "TerminalNode")){
-	            let nodes = [];
-	            child.children.forEach(()=> nodes.push(DOMChildren.shift()));
-	
-	            child.mapDOM(nodes, this.args.domToOhm, this.args.ohmToDom);
-	            // i += child.children.length === 0? 0: child.children.length - 1;
-	          } else if(child._node.constructor.name !== "TerminalNode"
-	          && child._node.ctorName !== "_iter"){
-	            child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);
+	        if(child._node.ctorName === "_iter"){
+	          let iters = [child];
+	          while(children[i+1] && children[i+1]._node.ctorName === "_iter"){
+	            if(children[i+1].interval.contents === iters[0].interval.contents){
+	              iters.push(children[++i]);
+	            } else {
+	              break;
+	            }
 	          }
-	        }
-	      },
-	      _iter(children){
-	        let DOMNodes = this.args.DOMNode;
-	        if(children.length !== DOMNodes.length){
-	          return;
-	        }
 	
-	        children.forEach((child, i)=> child.mapDOM(DOMNodes[i], this.args.domToOhm, this.args.ohmToDom));
+	          let numDOMChildrenCovered = iters.reduce((agg, b)=>agg + b.children.length, 0);
+	          let DOMChildrenCovered = DOMChildren.slice(0, numDOMChildrenCovered);
+	          DOMChildren = DOMChildren.slice(numDOMChildrenCovered);
+	
+	          let iterDOMChildren = iters.map(()=>[]);
+	          DOMChildrenCovered.forEach((domChild, i)=>{
+	            iterDOMChildren[i % iterDOMChildren.length].push(domChild);
+	          });
+	
+	          iterDOMChildren.forEach((domChildren, i)=>{
+	            iters[i].mapDOM(domChildren, this.args.domToOhm, this.args.ohmToDom);
+	          });
+	        } else {
+	          child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);
+	        }
 	      }
-	    });
+	    },
+	    _iter(children){
+	      let DOMNodes = this.args.DOMNode;
+	      if(children.length !== DOMNodes.length){
+	        throw new Error(`ERROR: iterator node got a different number of dom nodes(${DOMNodes.length}) than children(${children.length})`);
+	        return;
+	      }
+	
+	      children.forEach((child, i)=> child.mapDOM(DOMNodes[i], this.args.domToOhm, this.args.ohmToDom));
+	    },
+	    _terminal(){
+	      this.args.domToOhm.set(this.args.DOMNode, this._node);
+	      this.args.ohmToDom.set(this._node, this.args.DOMNode);
+	    }
+	  });
 	}
 	
 	function reify(semantics, match){
@@ -469,6 +533,31 @@ webpackJsonp([1],[
 	        }
 	
 	        return simplifiedNode;
+	      },
+	      _terminal(){
+	        let simplifiedNode;
+	        if(this.args.simplifiedParentNode
+	          && this.args.simplifiedParentNode.cstNodes[0].interval.contents ===
+	          this.interval.contents){
+	          simplifiedNode = this.args.simplifiedParentNode;
+	          simplifiedNode.cstNodes.push(this._node);
+	          simplifiedNode.ctorName = "terminal";
+	
+	        } else {
+	          simplifiedNode = {
+	            ctorName: "terminal",
+	            cstNodes: [this._node],
+	            parent: this.args.simplifiedParentNode,
+	            children: []
+	          };
+	
+	          if(this.args.simplifiedParentNode){
+	            this.args.simplifiedParentNode.children.push(simplifiedNode);
+	          }
+	        }
+	
+	        this.args.nodeToSimplified.set(this._node, simplifiedNode);
+	        return simplifiedNode;
 	      }
 	    });
 	}
@@ -536,7 +625,8 @@ webpackJsonp([1],[
 	  }
 	
 	  update(parent){
-	    let nodes = this.tree.nodes(this.root);//.reverse();
+	    let nodes = this.tree.nodes(this.root).reverse(),
+	        links = this.tree.links(nodes);
 	
 	    let svgNode = this.svg.selectAll("g.node")
 	      .data(nodes, function(d){ //assign each object an id since d3 can't do object equality apparently :/
@@ -553,7 +643,8 @@ webpackJsonp([1],[
 	      .attr("transform", `translate(${parent.y0}, ${parent.x0})`)
 	      .attr("id", (d)=>d.id)
 	    .append("circle")
-	      .attr("r", 5);
+	      .attr("r", (node)=>
+	        node.landmark? 8: 5);
 	
 	    let treeviz = this;
 	    let svgNodeUpdate = svgNode
@@ -573,7 +664,9 @@ webpackJsonp([1],[
 	    .transition().duration(duration)
 	      .attr("transform", (n)=> `translate(${n.y}, ${n.x})`)
 	      .style("fill", (n)=> {
-	        if( n.cstNodes[0].result instanceof Error ){
+	        if( n.landmark ){
+	          return "gray";
+	        } else if( n.cstNodes[0].result instanceof Error ){
 	          return  "red";
 	        } else {
 	          return "green";

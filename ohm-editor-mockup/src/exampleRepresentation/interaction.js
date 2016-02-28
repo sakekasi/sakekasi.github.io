@@ -53,14 +53,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
   let simplifiedCST = semmatch.simplifyCST(null, nodeToSimplified);
   nodeToResults = mapSemantics.mapSemantics(semantics, "toAST", match);
 
-  for(let key of nodeToResults.keys()){
-    if(! (key.constructor.name === "TerminalNode")){
-      let domNode = ohmToDom.get(key);
-      let result = nodeToResults.get(key);
+  for(let key of ohmToDom.keys()){
+    let domNode = ohmToDom.get(key);
+    let simplifiedNode = nodeToSimplified.get(key);
 
-      key.result = result;
-      ohmToDom.get(nodeToSimplified.get(key).cstNodes[0]).setAttribute("possibleCurrent", "true");
-      domNode.setAttribute("result", result instanceof Error? "error": "success");
+    if(! (key.constructor.name === "TerminalNode")){
+      if(nodeToResults.has(key)){
+        let result = nodeToResults.get(key);
+
+        ohmToDom.get(simplifiedNode.cstNodes[0]).setAttribute("possibleCurrent", "true");
+
+        key.result = result;
+        domNode.setAttribute("result", result instanceof Error? "error": "success");
+      }
+    } else {
+      let parent = domNode.parentNode;
+      if( Array.prototype.slice.call(parent.children).find(child=> child.tagName.toLowerCase() !== "terminal")  ){
+        domNode.classList.add("landmark");
+        simplifiedNode.landmark = true;
+      }
     }
   }
 

@@ -29,11 +29,46 @@ function registerReifyActions(semantics){
   semantics.addOperation("reifyAST(tagPositions)", {
     _nonterminal(children){
       let start = this.interval.startIdx,
-      end = this.interval.endIdx;
+          end = this.interval.endIdx;
       let tagName = this._node.ctorName;
 
       getWithInit(this.args.tagPositions, start, []).push(openTag(tagName));
-      children.forEach(child=> child.reifyAST(this.args.tagPositions));
+
+      for(let i=0; i < children.length; i++){
+        let child = children[i];
+        if(child._node.ctorName === "_iter"){
+          let iters = [child];
+          while(children[i+1] && children[i+1]._node.ctorName === "_iter"){
+            if(children[i+1].interval.contents === iters[0].interval.contents){
+              iters.push(children[++i]);
+            } else {
+              break;
+            }
+          }
+
+          let iterChildren = iters.map((iter)=>Array.prototype.slice.call(iter.children));
+          let interleavedChildren = [];
+          while(iterChildren[0].length > 0){
+            iterChildren.forEach((iterC)=>{
+              interleavedChildren.push(iterC.shift());
+            });
+          }
+
+          interleavedChildren.forEach(child=> child.reifyAST(this.args.tagPositions));
+        } else {
+          child.reifyAST(this.args.tagPositions);
+        }
+      }
+
+      // children.forEach(child=> child.reifyAST(this.args.tagPositions));
+      getWithInit(this.args.tagPositions, end, []).push(closeTag(tagName));
+    },
+    _terminal(){
+      let start = this.interval.startIdx,
+          end = this.interval.endIdx;
+      let tagName = "terminal";
+
+      getWithInit(this.args.tagPositions, start, []).push(openTag(tagName));
       getWithInit(this.args.tagPositions, end, []).push(closeTag(tagName));
     }
   });
@@ -46,29 +81,47 @@ function registerReifyActions(semantics){
       let DOMChildren = Array.prototype.slice.apply(this.args.DOMNode.children);
       for(let i=0; i < children.length; i++){
         let child = children[i];
-        if(child._node.ctorName === "_iter"
-        && !(child._node.children.length > 0
-          && child._node.children[0].constructor.name === "TerminalNode")){
-            let nodes = [];
-            child.children.forEach(()=> nodes.push(DOMChildren.shift()));
-
-            child.mapDOM(nodes, this.args.domToOhm, this.args.ohmToDom);
-            // i += child.children.length === 0? 0: child.children.length - 1;
-          } else if(child._node.constructor.name !== "TerminalNode"
-          && child._node.ctorName !== "_iter"){
-            child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);
+        if(child._node.ctorName === "_iter"){
+          let iters = [child];
+          while(children[i+1] && children[i+1]._node.ctorName === "_iter"){
+            if(children[i+1].interval.contents === iters[0].interval.contents){
+              iters.push(children[++i]);
+            } else {
+              break;
+            }
           }
-        }
-      },
-      _iter(children){
-        let DOMNodes = this.args.DOMNode;
-        if(children.length !== DOMNodes.length){
-          return;
-        }
 
-        children.forEach((child, i)=> child.mapDOM(DOMNodes[i], this.args.domToOhm, this.args.ohmToDom));
+          let numDOMChildrenCovered = iters.reduce((agg, b)=>agg + b.children.length, 0);
+          let DOMChildrenCovered = DOMChildren.slice(0, numDOMChildrenCovered);
+          DOMChildren = DOMChildren.slice(numDOMChildrenCovered);
+
+          let iterDOMChildren = iters.map(()=>[]);
+          DOMChildrenCovered.forEach((domChild, i)=>{
+            iterDOMChildren[i % iterDOMChildren.length].push(domChild);
+          });
+
+          iterDOMChildren.forEach((domChildren, i)=>{
+            iters[i].mapDOM(domChildren, this.args.domToOhm, this.args.ohmToDom);
+          });
+        } else {
+          child.mapDOM(DOMChildren.shift(), this.args.domToOhm, this.args.ohmToDom);
+        }
       }
-    });
+    },
+    _iter(children){
+      let DOMNodes = this.args.DOMNode;
+      if(children.length !== DOMNodes.length){
+        throw new Error(`ERROR: iterator node got a different number of dom nodes(${DOMNodes.length}) than children(${children.length})`);
+        return;
+      }
+
+      children.forEach((child, i)=> child.mapDOM(DOMNodes[i], this.args.domToOhm, this.args.ohmToDom));
+    },
+    _terminal(){
+      this.args.domToOhm.set(this.args.DOMNode, this._node);
+      this.args.ohmToDom.set(this._node, this.args.DOMNode);
+    }
+  });
 }
 
 function reify(semantics, match){

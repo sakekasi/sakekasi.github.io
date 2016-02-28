@@ -56,7 +56,8 @@ class TreeViz{
   }
 
   update(parent){
-    let nodes = this.tree.nodes(this.root);//.reverse();
+    let nodes = this.tree.nodes(this.root).reverse(),
+        links = this.tree.links(nodes);
 
     let svgNode = this.svg.selectAll("g.node")
       .data(nodes, function(d){ //assign each object an id since d3 can't do object equality apparently :/
@@ -73,7 +74,8 @@ class TreeViz{
       .attr("transform", `translate(${parent.y0}, ${parent.x0})`)
       .attr("id", (d)=>d.id)
     .append("circle")
-      .attr("r", 5);
+      .attr("r", (node)=>
+        node.landmark? 8: 5);
 
     let treeviz = this;
     let svgNodeUpdate = svgNode
@@ -93,7 +95,9 @@ class TreeViz{
     .transition().duration(duration)
       .attr("transform", (n)=> `translate(${n.y}, ${n.x})`)
       .style("fill", (n)=> {
-        if( n.cstNodes[0].result instanceof Error ){
+        if( n.landmark ){
+          return "gray";
+        } else if( n.cstNodes[0].result instanceof Error ){
           return  "red";
         } else {
           return "green";

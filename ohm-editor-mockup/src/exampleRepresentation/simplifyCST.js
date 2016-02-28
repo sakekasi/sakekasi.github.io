@@ -63,6 +63,31 @@ function registerSimplifyAction(semantics){
         }
 
         return simplifiedNode;
+      },
+      _terminal(){
+        let simplifiedNode;
+        if(this.args.simplifiedParentNode
+          && this.args.simplifiedParentNode.cstNodes[0].interval.contents ===
+          this.interval.contents){
+          simplifiedNode = this.args.simplifiedParentNode;
+          simplifiedNode.cstNodes.push(this._node);
+          simplifiedNode.ctorName = "terminal";
+
+        } else {
+          simplifiedNode = {
+            ctorName: "terminal",
+            cstNodes: [this._node],
+            parent: this.args.simplifiedParentNode,
+            children: []
+          };
+
+          if(this.args.simplifiedParentNode){
+            this.args.simplifiedParentNode.children.push(simplifiedNode);
+          }
+        }
+
+        this.args.nodeToSimplified.set(this._node, simplifiedNode);
+        return simplifiedNode;
       }
     });
 }
