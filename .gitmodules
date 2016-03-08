@@ -4,3 +4,7 @@
 [submodule "blocks-prototype"]
 	path = blocks-prototype
 	url = https://github.com/sakekasi/blocks-prototype.git
+[submodule "ohm-semantic-editor-prototype"]
+	path = ohm-semantic-editor-prototype
+	url = git@gitlab.com:cdg/ohm-semantic-editor-prototype.git
+	branch = gh-pages
