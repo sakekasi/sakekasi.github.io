@@ -1,0 +1,398 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="lib/codemirror-5.11/lib/codemirror.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/grammar.css">
+  <link rel="stylesheet" type="text/css" href="css/semanticEditor.css">
+  <link rel="stylesheet" type="text/css" href="css/example.css">
+  <script type="text/ohm-js">
+O {
+
+  Program
+    = Stmts
+
+  Stmts
+    = Stmt* Exp?
+
+  Stmt
+    = class ident (extends ident)? (with NonemptyListOf<ident, ",">)? ";"  -- classDecl
+    | def ident "." ident "(" ListOf<ident, ","> ")" MethodBody                -- methodDeclJava
+    | def ident (ident ":" ident)+ MethodBody                                       -- methodDeclKeyword
+    | def ident binSelector ident MethodBody                                         -- methodDeclBinary
+    | def ident "(" ListOf<ident, ","> ")" MethodBody                             -- methodDeclCall
+    | var ident "=" Exp ";"                                                              -- varDecl
+    | ident "=" Exp ";"                                                                   -- varAssign
+    | this "." ident "=" Exp ";"                                                        -- instVarAssign
+    | return Exp ";"                                                                       -- return
+    | Exp ";"                                                                                -- exp
+
+  MethodBody
+    = "=" Exp ";"    -- exp
+    | "{" Stmts "}"  -- stmt
+
+  Exp
+    = KWSendExp
+
+  KWSendExp
+    = EqExp (ident ":" EqExp)+  -- send
+    | super (ident ":" EqExp)+  -- super
+    | EqExp
+
+  EqExp
+    = RelExp ("==" | "!=") RelExp  -- eq
+    | RelExp
+
+  RelExp
+    = AddExp ("<=" | "<" | ">=" | ">") AddExp  -- rel
+    | AddExp
+
+  AddExp
+    = AddExp ("+" | "-") MulExp  -- add
+    | MulExp
+
+  MulExp
+    = MulExp ("*" | "/" | "%") DotExp  -- mul
+    | DotExp
+
+  DotExp
+    = DotExp "." ident "(" Actuals ")"  -- send
+    | super "." ident "(" Actuals ")"   -- super
+    | this "." ident  ~"("              -- instVarAccess
+    | UnExp
+
+  UnExp
+    = "-" CallExp  -- neg
+    | CallExp
+
+  CallExp
+    = CallExp "(" Actuals ")"  -- call
+    | PriExp
+
+  PriExp
+    = "(" Exp ")"                  -- paren
+    | "{" BlockArgNames Stmts "}"  -- block
+    | new ident "(" Actuals ")"    -- new
+    | string                       -- str
+    | ident                        -- ident
+    | number                       -- number
+    | this                         -- this
+    | trueK                        -- true
+    | falseK                       -- false
+    | nullK                        -- null
+
+  Actuals
+    = ListOf<Exp, ",">
+
+  BlockArgNames
+    = ListOf<ident, ","> "|"  -- some
+    |                         -- none
+
+  // Lexical rules
+
+  ident  (an identifier)
+    = ~keyword letter alnum*
+
+  string  (a string literal)
+    = "\"" (~"\"" ~"\n" any)* "\""
+
+  number  (a number literal)
+    = digit* "." digit+  -- fract
+    | digit+             -- whole
+
+  binSelector  (a binary selector)
+    = "==" | "!=" | "<=" | "<" | ">=" | ">" | "+"  | "-"  | "*"  | "/" | "%" | "@"
+
+  class = "class" ~alnum
+  def = "def" ~alnum
+  extends = "extends" ~alnum
+  falseK = "false" ~alnum
+  new = "new" ~alnum
+  nullK = "null" ~alnum
+  return = "return" ~alnum
+  super = "super" ~alnum
+  this = "this" ~alnum
+  trueK = "true" ~alnum
+  var = "var" ~alnum
+  with = "with" ~alnum
+
+  keyword
+    = class | def | extends | falseK | new | nullK | return | super | this | trueK | var | with
+
+  space
+   += comment
+
+  comment
+    = "/*" (~"*/" any)* "*/"  -- multiLine
+    | "//" (~"\n" any)*       -- singleLine
+
+  tokens
+    = (keyword | ident | number | comment | any)*
+
+}
+  </script>
+  <!-- <script type="text/ohm-js">
+F {
+
+  Exp
+    = let PriPat "=" Exp in Exp                           -- let
+    | let rec ident "=" Exp in Exp                        -- letrec
+    | let rec "(" ident ":" Type ")" "=" Exp in Exp       -- typedLetrec
+    | fun PriPat+ "->" Exp                                -- fun
+    | if Exp then Exp else Exp                            -- if
+    | match Exp with "|"? NonemptyListOf<PatAndExp, "|">  -- match
+    | OrExp
+
+  PatAndExp
+    = Pat "->" Exp
+
+  Pat
+    = ctor PriPat  -- datum
+    | PriPat
+
+  PriPat
+    = ctor                      -- emptyDatum
+    | "(" Pat ")"               -- paren
+    | "(" Pat ":" Type ")"      -- typed
+    | "(" ListOf<Pat, ","> ")"  -- tuple
+    | "[" ListOf<Pat, ";"> "]"  -- list
+    | "_"                       -- wild
+    | ident                     -- ident
+    | number                    -- number
+    | trueK                     -- true
+    | falseK                    -- false
+
+  OrExp
+    = OrExp "||" AndExp  -- or
+    | AndExp
+
+  AndExp
+    = AndExp "&&" EqExp  -- and
+    | EqExp
+
+  EqExp
+    = RelExp "="  RelExp  -- eq
+    | RelExp "!=" RelExp  -- neq
+    | RelExp
+
+  RelExp
+    = AddExp "<" AddExp  -- lt
+    | AddExp ">" AddExp  -- gt
+    | AddExp
+
+  AddExp
+    = AddExp "+" MulExp  -- plus
+    | AddExp "-" MulExp  -- minus
+    | MulExp
+
+  MulExp
+    = MulExp "*" CallExp  -- times
+    | MulExp "/" CallExp  -- divide
+    | MulExp "%" CallExp  -- modulus
+    | CallExp
+
+  CallExp
+    =  CallExp PriExp  -- call
+    |  UnExp
+
+  UnExp
+    = "+" DatumExp    -- pos
+    | "-" DatumExp    -- neg
+    | delay DatumExp  -- delay
+    | force DatumExp  -- force
+    | DatumExp
+
+  DatumExp
+    = ctor PriExp  -- datum
+    | PriExp
+
+  PriExp
+    = ctor                                       -- emptyDatum
+    | "(" Exp ")"                                -- paren
+    | "(" Exp ":" Type ")"                       -- typed
+    | "(" ListOf<Exp, ","> ")"                   -- tuple
+    | "[" Exp "|" Pat "<-" Exp ("," Exp)? "]"    -- listComp
+    | "[" ListOf<Exp, ";"> "]"                   -- list
+    | ident                                      -- ident
+    | number                                     -- number
+    | trueK                                      -- true
+    | falseK                                     -- false
+
+  Type
+    = FunType
+
+  FunType
+    = TupleType "->" FunType  -- fun
+    | TupleType
+
+  TupleType
+    = ListOrDelayedType ("*" ListOrDelayedType)+  -- tuple
+    | ListOrDelayedType
+
+  ListOrDelayedType
+    = ListOrDelayedType list     -- list
+    | ListOrDelayedType delayed  -- delayed
+    | PriType
+
+  PriType
+    = "(" Type ")"  -- paren
+    | int           -- int
+    | bool          -- bool
+    | unit          -- unit
+    | typeVar
+
+  typeVar  (a type variable)
+    = "'" ident
+
+  // Lexical rules
+
+  ident  (an identifier)
+    = ~keyword lower alnum*
+
+  ctor  (a data constructor)
+    = ~keyword upper alnum*
+
+  number  (a number)
+    = digit* "." digit+  -- fract
+    | digit+             -- whole
+
+  fun = "fun" ~alnum
+
+  let    = "let" ~alnum
+  rec    = "rec" ~alnum
+  in     = "in" ~alnum
+
+  if   = "if" ~alnum
+  then = "then" ~alnum
+  else = "else" ~alnum
+
+  match = "match" ~alnum
+  with  = "with" ~alnum
+
+  trueK  = "true" ~alnum
+  falseK = "false" ~alnum
+
+  delay = "delay" ~alnum
+  force = "force" ~alnum
+
+  int = "int" ~alnum
+  bool = "bool" ~alnum
+  unit = "unit" ~alnum
+  list = "list" ~alnum
+  delayed = "delayed" ~alnum
+
+  keyword
+    = fun   | let  | rec   | in      | if    | then  | else
+    | match | with | trueK | falseK  | delay | force | int
+    | bool  | unit | list  | delayed
+
+  space
+   += comment
+
+  comment
+    = "/*" (~"*/" any)* "*/"  -- multiLine
+    | "//" (~"\n" any)*       -- singleLine
+
+  tokens
+    = (keyword | ident | ctor | number | comment | any)*
+
+}
+
+  </script> -->
+</head>
+<body>
+<columns>
+
+
+
+
+
+<column id="examples">
+<example>
+<exampleText>
+  <!-- <pre id="example">
+class Point with x, y;
+
+def Point.init(x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+def Point.toString() {
+  return "Point(" + this.x + ", " + this.y + ")";
+}
+
+
+class ThreeDeePoint extends Point with z;
+
+def ThreeDeePoint.init(x, y, z) {
+  super.init(x, y);
+  this.z = z;
+}
+
+def ThreeDeePoint.toString() {
+  return "ThreeDeePoint(" +
+    this.x + ", " +
+    this.y + ", " +
+    this.z + ")";
+}
+
+new Point(1, 2);
+</pre> -->
+<pre id="example">
+def True then: run else: skip {
+  run.call();
+}
+
+def False then: skip else: run {
+  run.call();
+}
+
+def Number.fibonacci(i) {
+  (i==0) then: {
+    return 0;
+  } else: {
+    (i==1) then: {
+      return 1;
+    } else: {
+      return (this-1).fibonacci() +
+              (this-2).fibonacci();
+    }
+  }
+}
+
+52.fibonacci()
+</pre>
+<!-- <pre id="example">
+let rec f = fun n ->
+            match n with
+              0 -> 1
+            | _ -> n * f (n - 1) in
+f 6
+</pre> -->
+  example's text
+</exampleText>
+<exampleCST>
+  <svg id="tree"></svg>
+  example's (simplified) CST
+</exampleCST>
+</example>
+</column>
+
+
+<column id="grammarSemantics">
+  <div class="flex-fix">
+    <div class="editorWrapper"></div>
+  </div>
+</column>
+
+
+</columns>
+
+<script src="lib/codemirror-5.11/lib/codemirror.js"></script>
+<script src="lib/ohm.js"></script>
+<script src="lib/d3.min.js"></script>
+<script src="dist/commons.js"></script>
+<script src="dist/semanticEditor.bundle.js"></script>
+
+</body>
+</html>

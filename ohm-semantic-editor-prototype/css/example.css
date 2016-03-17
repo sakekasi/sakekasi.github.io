@@ -1,0 +1,120 @@
+example {
+  display: flex;
+  flex-direction: row;
+}
+
+pre#example{
+  line-height: 1.2;
+  margin-bottom: 30px;
+  flex: 1;
+  font-family: "input serif",luculent, monaco, consolas, monospace;
+  font-stretch: extra-condensed;
+  font-weight: normal;
+  color: hsl(0, 0%, 55%);
+}
+
+svg#tree {
+  /* height: 100; */
+  width: 200px;
+  flex-grow: 1;
+  margin-bottom: 0px;
+}
+
+.current {
+  transition: background-color 0.1s;
+  -o-transition: background-color 0.1s;
+  -moz-transition: background-color 0.1s;
+  -webkit-transition: background-color 0.1s;
+
+  transition-timing-function: ease;
+  -o-transition-timing-function: ease;
+  -moz-transition-timing-function: ease;
+  -webkit-transition-timing-function: ease;
+
+  font-size: 15px;
+  z-index: 0;
+  transition-delay: 0.1s;
+}
+
+
+.current:hover,
+.current.active,
+.active .current {
+
+  font-size: 15px;
+  background-color: hsla(0, 0%, 0%, 0.1);
+  z-index: 1;
+  opacity: 0.9;
+  /* border-radius: 10px; */
+  background-size: cover;
+  transition-delay: 0s;
+}
+
+stmt.current {}
+
+circle {
+}
+
+
+.current[result="success"]{
+  color: rgb(59, 202, 134);/*hsl(156, 88%, 37%);*/
+}
+
+.current[result="error"]{
+  color: rgb(255, 139, 121);/*hsl(6, 98%, 69%);*/
+}
+
+pre *.active[result="success"] * {
+  color: rgb(59, 202, 134) !important;/*hsl(156, 88%, 37%);*/
+}
+
+pre *.active[result="error"] * {
+  color: rgb(255, 139, 121) !important;/*hsl(6, 98%, 69%);*/
+}
+
+div#visualization {
+  display: flex;
+  flex-direction: row;
+}
+
+.current *[possiblecurrent="true"],
+.active *[possiblecurrent="true"] {
+  transition-delay: 0.2s, 0.2s;
+}
+
+
+.current:hover *[possiblecurrent="true"],
+.current.active *[possiblecurrent="true"],
+.active .current *[possiblecurrent="true"] {
+    background-color: hsla(0, 0%, 0%, 0.02);
+
+    transition-delay: 0s, 0s;
+}
+
+
+column#grammar {
+    display: none;
+}
+
+column#semantics {
+    display: none;
+}
+
+column#examples {
+    margin-left: 100px;
+}
+
+.landmark, .keyword {
+  font-weight: bolder;
+}
+
+
+examplecst {
+    display: flex;
+    flex-direction: column;
+}
+
+
+exampletext {
+    margin: 50px 0px;
+}
